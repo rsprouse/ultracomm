@@ -1,0 +1,4 @@
+#define Ulterius_sdk_VERSION_MAJOR @Ulterius_sdk_VERSION_MAJOR@
+#define Ulterius_sdk_VERSION_MINOR @Ulterius_sdk_VERSION_MINOR@
+#define Ulterius_sdk_VERSION_PATCH @Ulterius_sdk_VERSION_PATCH@
+#define Ulterius_sdk_VERSION @Ulterius_sdk_VERSION@

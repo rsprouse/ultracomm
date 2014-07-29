@@ -1,0 +1,5 @@
+#!/bin/sh
+
+c++ -c ultracomm.cpp
+c++ -c main.cpp
+c++ -lboost_program_options -o ultracomm main.o ultracomm.o
