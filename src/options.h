@@ -19,4 +19,4 @@ struct MissingOptionsFileError : public exception
     }
 };
 
-void get_cmdline_options(const int& argc, char* argv[], po::variables_map& vm);
+void get_program_options(const int& argc, char* argv[], po::variables_map& vm);

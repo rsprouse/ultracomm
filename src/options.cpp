@@ -7,7 +7,7 @@
 /*
   Get option values from command line and options file.
 */
-void get_cmdline_options(const int& argc, char* argv[], po::variables_map& vm)
+void get_program_options(const int& argc, char* argv[], po::variables_map& vm)
 {
     //string appName = boost::filesystem::basename(argv[0]);
 

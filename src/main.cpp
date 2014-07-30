@@ -6,7 +6,7 @@ int main(int argc, char* argv[])
     po::variables_map opt;  // Command line and options file options.
 
     try {
-      get_cmdline_options(argc, argv, opt);
+      get_program_options(argc, argv, opt);
       Ultracomm uc = Ultracomm::Ultracomm(opt);
       uc.verify_uparams(opt);
       uc.freeze();
