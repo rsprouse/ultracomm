@@ -67,7 +67,8 @@ Running
    If you build directory is `C:\build\ultracomm` then your executable should
    be in a directory named like `C:\build\ultracomm\bin\Debug` or
    `C:\build\bin\Release`.
-1. Copy these .dll files to the same folder as the executable.
+1. Copy these .dll files from the Ultrasonix SDK to the same folder as the
+   executable.
     `ulterius.dll` (or `ulterius_old.dll`)
     `umc_string_convert.dll`
     `umc_unit_convert.dll`
