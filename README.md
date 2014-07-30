@@ -52,7 +52,7 @@ Compiling
    e.g. `C:\local\boost_1_55_0\lib32-msvc-10.0`. Click Apply.
 TODO: this should be taken care of by CMake. Figure out how to add boost there.
  
-1. From the "Build" menu select "Build Solution". This will compile `ultracomm.exe`.
+1. Right-click the ultracomm project and choose 'Build'. This will compile `ultracomm.exe`.
 
 1. Take note of your build configuration, usually shown on the toolbar below the menu bar.
    It is set by default to Debug & Win32. This will help you find the compiled executable.
