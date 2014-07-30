@@ -1,5 +1,5 @@
 # Vim files
-.swp
+*.swp
 *~
 
 # Compiled Object files
