@@ -16,7 +16,7 @@
 
 #include "ultracomm.h"
 #include "options.h"
-#include "error_codes.h"
+#include "exit_codes.h"
 
 namespace po = boost::program_options;
 using namespace std;
