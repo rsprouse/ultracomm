@@ -48,7 +48,7 @@ Compiling
    in the Solution Explorer pane.
 
 1. Right-click the ultracomm project, Properties > Configuration Properties > Linker >
-   Additional Library Directories > Edit.... Add the location of the boost libraries,
+   General > Additional Library Directories > Edit.... Add the location of the boost libraries,
    e.g. `C:\local\boost_1_55_0\lib32-msvc-10.0`. Click Apply.
 TODO: this should be taken care of by CMake. Figure out how to add boost there.
  
