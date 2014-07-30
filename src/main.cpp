@@ -3,11 +3,12 @@
 int main(int argc, char* argv[])
 {
 
+    Ultracomm uc;
     po::variables_map opt;  // Command line and options file options.
 
     try {
       get_program_options(argc, argv, opt);
-      Ultracomm uc = Ultracomm::Ultracomm(opt);
+      uc = Ultracomm::Ultracomm(opt);
       uc.verify_uparams(opt);
       uc.freeze();
       cout << "Acquiring images. Press <Enter> to stop.\n";
