@@ -61,9 +61,12 @@ TODO: this should be taken care of by CMake. Figure out how to add boost there.
 Running
 -------
 
-1. Find the compiled executable `ultracomm.exe` in a subdirectory of the `bin` directory of your SDK folder.
-   The name of the subdirectory will depend on your build configuration, for example, `Debug` or `Release`,
-   resulting in a directory like `C:\build\bin\Debug` or `C:\build\bin\Release`.
+1. Find the compiled executable `ultracomm.exe` in a subdirectory of the
+   `bin` directory of your build folder. The name of the subdirectory will
+   depend on your build configuration, for example, `Debug` or `Release`.
+   If you build directory is `C:\build\ultracomm` then your executable should
+   be in a directory named like `C:\build\ultracomm\bin\Debug` or
+   `C:\build\bin\Release`.
 1. Copy these .dll files to the same folder as the executable.
     `ulterius.dll` (or `ulterius_old.dll`)
     `umc_string_convert.dll`
