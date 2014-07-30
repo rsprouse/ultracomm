@@ -2,6 +2,7 @@
 
 #define BUFFERSIZE (2 * 1024 * 1024)
 char gBuffer[BUFFERSIZE];
+#define PROBE_ID 19   	// TODO: remove hard-coding of probe id
 
 Ultracomm::Ultracomm()
 {
@@ -78,6 +79,7 @@ void Ultracomm::freeze()
 // TODO: throw correct error
         throw ConnectionError();
     }
+	ult.setCompressionStatus(1);
 }
 
 /*
@@ -111,6 +113,15 @@ int Ultracomm::set_uparams(const po::variables_map& params)
     {
         ult.setParamValue("b-depth", params["b-depth"].as<int>());
     }
+    // TODO: automating this is a pain because of the space in the param name
+    if (params.count("trigger_out"))
+    {
+        ult.setParamValue("trigger out", params["trigger_out"].as<int>());
+    }
+    if (params.count("trigger_out_2"))
+    {
+        ult.setParamValue("trigger out 2", params["trigger_out_2"].as<int>());
+    }
     return 1;
 }
 
@@ -130,7 +141,7 @@ int Ultracomm::verify_uparams(const po::variables_map& params)
 
 int Ultracomm::save(const string& outbase)
 {
-cerr << "Intending to save.\n";
+	int num_frames = ult.getCineDataCount((uData)datatype);
     uDataDesc desc;
     if (! ult.getDataDescriptor((uData)datatype, desc))
     {
@@ -140,27 +151,65 @@ cerr << "Intending to save.\n";
     {
         throw DataError();
     }
-    outbase.append(".bpr");
-//    char fname[330];  // TODO: this isn't safe
-// TODO: figure out why buffer and sz makes program crash
+	string outname = outbase;
+    string ext = ".bpr";
+    outname += ext;
+    ofstream outfile (outname, ios::out | ios::binary);
+
+/* **** begin header info **** */
+	/*
+	TODO: header information should be correct for our .bpr files but probably
+	is not correct for other datatypes.
+	*/
+	int isize = sizeof(__int32);
+	outfile.write(reinterpret_cast<const char *>(&(__int32)datatype), isize);
+	outfile.write(reinterpret_cast<const char *>(&(__int32)num_frames), isize);
+	outfile.write(reinterpret_cast<const char *>(&(__int32)desc.w), isize);
+	outfile.write(reinterpret_cast<const char *>(&(__int32)desc.h), isize);
+	outfile.write(reinterpret_cast<const char *>(&(__int32)desc.ss), isize);
+	outfile.write(reinterpret_cast<const char *>(&(__int32)desc.roi.ulx), isize);
+	outfile.write(reinterpret_cast<const char *>(&(__int32)desc.roi.uly), isize);
+	outfile.write(reinterpret_cast<const char *>(&(__int32)desc.roi.urx), isize);
+	outfile.write(reinterpret_cast<const char *>(&(__int32)desc.roi.ury), isize);
+	outfile.write(reinterpret_cast<const char *>(&(__int32)desc.roi.brx), isize);
+	outfile.write(reinterpret_cast<const char *>(&(__int32)desc.roi.bry), isize);
+	outfile.write(reinterpret_cast<const char *>(&(__int32)desc.roi.blx), isize);
+	outfile.write(reinterpret_cast<const char *>(&(__int32)desc.roi.bly), isize);
+	int probe_id = PROBE_ID;
+	outfile.write(reinterpret_cast<const char *>(&(__int32)probe_id), isize);
+    int txf;
+    ult.getParamValue("b-freq", txf);
+	outfile.write(reinterpret_cast<const char *>(&(__int32)txf), isize);
+    int sf;
+    ult.getParamValue("vec-freq", sf);
+		// TODO: this gives 4000000 instead of 8000000
+	sf = 8000000;
+	outfile.write(reinterpret_cast<const char *>(&(__int32)sf), isize);
+	int dr;
+	ult.getParamValue("frame rate", dr);
+	outfile.write(reinterpret_cast<const char *>(&(__int32)dr), isize);
+	int ld;
+	ult.getParamValue("b-ldensity", ld);
+	outfile.write(reinterpret_cast<const char *>(&(__int32)ld), isize);
+	int extra;
+	//ult.getParamValue("color-ensemble", extra);
+	extra = 0;   // TODO: figure out what goes here
+	outfile.write(reinterpret_cast<const char *>(&(__int32)extra), isize);
+/* **** end header info **** */
+
+	// TODO: figure out why buffer and sz makes program crash
     //const int sz = 2 * 1024 * 1024;
     //char buffer[BUFFERSIZE];  // TODO: determine appropriate sizes on the fly
-    int num_frames = ult.getCineDataCount((uData)datatype);
+//    int num_frames = ult.getCineDataCount((uData)datatype);
+
+	// TODO: framesize assumes desc.ss is always a multiple of 8, and that might not be safe.
+	int framesize = (desc.ss / 8) * desc.w * desc.h;
     for (int idx = 0; idx < num_frames; idx++)
     {
-/*
-        char frmnumstr[80];
-        sprintf(frmnumstr, ".%d", idx);
-        strcpy(fname, outbase.c_str());
-        strcat(fname, frmnumstr);
-        strcat(fname, ".bpr");
-*/
-        
-        ofstream outfile (outbase, ios::out | ios::binary);
         ult.getCineData((uData)datatype, idx, false, (char**)&gBuffer, BUFFERSIZE);
-        outfile.write(gBuffer, BUFFERSIZE);
-        outfile.close();
+        outfile.write(gBuffer, framesize);
     }
-
+    outfile.close();
     return 1;
 }
+

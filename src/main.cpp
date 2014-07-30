@@ -14,7 +14,6 @@ int main(int argc, char* argv[])
       uc.unfreeze();
       cin.ignore();  // Wait until <Enter>.
       uc.freeze();
-      cout << "From main(), going to save().\n";
       uc.save(opt["output"].as<string>());
       uc.disconnect();
     }

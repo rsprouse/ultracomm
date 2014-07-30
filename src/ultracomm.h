@@ -52,6 +52,5 @@ public:
     int set_uparams(const po::variables_map& params);
     int verify_uparams(const po::variables_map& params);
     int save(const string& outbase);
-
 };
 

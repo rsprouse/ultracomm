@@ -26,6 +26,8 @@ void get_cmdline_options(const int& argc, char* argv[], po::variables_map& vm)
         ("output,O", po::value<string>()->required(), "base output name (including path)")
         ("b-depth", po::value<int>(), "b-depth")
         ("datatype", po::value<int>(), "datatype")
+        ("trigger_out", po::value<int>(), "trigger out")
+        ("trigger_out_2", po::value<int>(), "trigger out 2")
         ("verbose,v", "display informational messages")
     ;
 
