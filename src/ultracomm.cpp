@@ -4,45 +4,30 @@
 char gBuffer[BUFFERSIZE];
 #define PROBE_ID 19   	// TODO: remove hard-coding of probe id
 
-/*
-Ultracomm::Ultracomm()
-{
-}
-
-// Construct and connect to address.
-Ultracomm::Ultracomm(const string& address)
-{
-    connect(address);
-    freeze();
-}
-*/
-
-// Construct, connect to address, and set parameters.
-//Ultracomm::Ultracomm(const po::variables_map& params)
+// Construct, connect to server, and set/verify parameters.
 Ultracomm::Ultracomm(const UltracommOptions& myuopt)
-    : uopt(myuopt)
+    : uopt(myuopt),
+      address(myuopt.opt["address"].as<string>()),
+      datatype(myuopt.opt["datatype"].as<int>())
 {
     connect();
+    ult.setDataToAcquire(datatype);
     set_uparams();
     verify_uparams();
 }
 
 /*
    Connect to the Ultrasonix.
-
-   Inputs:
-     addr: IP address of Ultrasonix machine.
 */
 void Ultracomm::connect()
 {
-    string addr = uopt.opt["address"].as<string>();
-    if (!ult.connect(addr.c_str()))
+    if (!ult.connect(address.c_str()))
     {
         throw ConnectionError();
     }
 /*
 TODO: throw different errors depending on problem. Note that FD_CONNECT error
-is when address is bad (123), and SOCKET_ERROR is when we couldn't connect
+is when server address is bad (e.g. 123), and SOCKET_ERROR is when we couldn't connect
 (address good but not in research mode). Should also test when address is good
 but ultrasound machine not running):
 
@@ -110,11 +95,7 @@ void Ultracomm::unfreeze()
 void Ultracomm::set_uparams()
 {
     po::variables_map params = uopt.opt;
-    if (params.count("datatype"))
-    {
-        datatype = params["datatype"].as<int>();
-        ult.setDataToAcquire(datatype);
-    }
+
     if (params.count("b-depth"))
     {
         ult.setParamValue("b-depth", params["b-depth"].as<int>());

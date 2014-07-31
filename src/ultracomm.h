@@ -10,6 +10,11 @@ using namespace std;
 
 class Ultracomm
 {
+    ulterius ult;                  // interface to Ultrasonix dll
+    const UltracommOptions& uopt;  // program options
+    const int datatype;            // type of data to acquire and save
+    const string address;          // IP address of Ultrasonix machine
+
 public:
     struct ConnectionError : public exception
     {
@@ -40,9 +45,6 @@ public:
         }
     };
 
-    ulterius ult;
-    const UltracommOptions& uopt;
-    int datatype;
 
     Ultracomm(const UltracommOptions& uopt);
     void connect();
