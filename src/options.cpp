@@ -4,10 +4,7 @@
   Command line and options file option handling for ultracomm.
 */
 
-/*
-  Get option values from command line and options file.
-*/
-void get_program_options(const int& argc, char* argv[], po::variables_map& vm)
+UltracommOptions::UltracommOptions(const int& argc, char* argv[])
 {
     //string appName = boost::filesystem::basename(argv[0]);
 
@@ -35,37 +32,37 @@ void get_program_options(const int& argc, char* argv[], po::variables_map& vm)
     po::options_description cmdline_options;
     cmdline_options.add(cmdonly).add(cmd_or_file);
 
-    // Read command line options into vm.
-    po::store(po::parse_command_line(argc, argv, cmdline_options), vm);
+    // Read command line options into opt.
+    po::store(po::parse_command_line(argc, argv, cmdline_options), opt);
 
     // This precedes po::notify() in case of error in parameters.
-    if (vm.count("help")) {
+    if (opt.count("help")) {
         cout << cmdline_options << "\n";
-        throw OptionWantsToStop();
+        throw WantsToStop();
     }
-    if (vm.count("version")) {
+    if (opt.count("version")) {
         cout << "Version info not implemented.\n";
-        throw OptionWantsToStop();
+        throw WantsToStop();
     }
 
     // Add cmd_or_file file options.
-    if (vm.count("optfile")) {
-        if (vm.count("verbose")) {
-            cout << "verbosity is " << vm.count("verbose") << ".\n";
-            cout << "Using options file " << vm["optfile"].as<string>() << ".\n";
+    if (opt.count("optfile")) {
+        if (opt.count("verbose")) {
+            cout << "verbosity is " << opt.count("verbose") << ".\n";
+            cout << "Using options file " << opt["optfile"].as<string>() << ".\n";
         }
 
-        ifstream ifs(vm["optfile"].as<string>().c_str());
+        ifstream ifs(opt["optfile"].as<string>().c_str());
         if (!ifs)
         {
             throw MissingOptionsFileError();
         }
         else
         {
-            po::store(parse_config_file(ifs, cmd_or_file), vm);
+            po::store(parse_config_file(ifs, cmd_or_file), opt);
         }
     }
 
     // Will throw exception if error in parameters.
-    po::notify(vm);
+    po::notify(opt);
 }

@@ -3,22 +3,20 @@
 int main(int argc, char* argv[])
 {
 
-    Ultracomm uc;
-    po::variables_map opt;  // Command line and options file options.
+    //string appName = boost::filesystem::basename(argv[0]);
 
     try {
-      get_program_options(argc, argv, opt);
-      uc = Ultracomm::Ultracomm(opt);
-      uc.verify_uparams(opt);
+      UltracommOptions uopt = UltracommOptions::UltracommOptions(argc, argv);
+      Ultracomm uc = Ultracomm::Ultracomm(uopt);
       uc.freeze();
       cout << "Acquiring images. Press <Enter> to stop.\n";
       uc.unfreeze();
       cin.ignore();  // Wait until <Enter>.
       uc.freeze();
-      uc.save(opt["output"].as<string>());
+      uc.save();
       uc.disconnect();
     }
-    catch(const OptionWantsToStop& e) {   // --help or --version
+    catch(const UltracommOptions::WantsToStop& e) {   // --help or --version
       cerr << e.what() << "\n";
       return 0;
     }
@@ -26,7 +24,7 @@ int main(int argc, char* argv[])
       cerr << "Missing required option: " << e.what() << "\n";
       return MISSING_REQUIRED_OPTION_ERROR;
     }
-    catch(const MissingOptionsFileError& e) {
+    catch(const UltracommOptions::MissingOptionsFileError& e) {
       cerr << e.what() << "\n";
       return MISSING_OPTIONS_FILE_ERROR;
     }

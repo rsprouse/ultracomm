@@ -4,6 +4,7 @@
 char gBuffer[BUFFERSIZE];
 #define PROBE_ID 19   	// TODO: remove hard-coding of probe id
 
+/*
 Ultracomm::Ultracomm()
 {
 }
@@ -14,13 +15,16 @@ Ultracomm::Ultracomm(const string& address)
     connect(address);
     freeze();
 }
+*/
 
 // Construct, connect to address, and set parameters.
-Ultracomm::Ultracomm(const po::variables_map& params)
+//Ultracomm::Ultracomm(const po::variables_map& params)
+Ultracomm::Ultracomm(const UltracommOptions& myuopt)
+    : uopt(myuopt)
 {
-    connect(params["address"].as<string>());
-    freeze();
-    set_uparams(params);
+    connect();
+    set_uparams();
+    verify_uparams();
 }
 
 /*
@@ -29,8 +33,9 @@ Ultracomm::Ultracomm(const po::variables_map& params)
    Inputs:
      addr: IP address of Ultrasonix machine.
 */
-void Ultracomm::connect(const string& addr)
+void Ultracomm::connect()
 {
+    string addr = uopt.opt["address"].as<string>();
     if (!ult.connect(addr.c_str()))
     {
         throw ConnectionError();
@@ -102,8 +107,9 @@ void Ultracomm::unfreeze()
     }
 }
 
-int Ultracomm::set_uparams(const po::variables_map& params)
+void Ultracomm::set_uparams()
 {
+    po::variables_map params = uopt.opt;
     if (params.count("datatype"))
     {
         datatype = params["datatype"].as<int>();
@@ -122,11 +128,11 @@ int Ultracomm::set_uparams(const po::variables_map& params)
     {
         ult.setParamValue("trigger out 2", params["trigger_out_2"].as<int>());
     }
-    return 1;
 }
 
-int Ultracomm::verify_uparams(const po::variables_map& params)
+void Ultracomm::verify_uparams()
 {
+    po::variables_map params = uopt.opt;
     if (params.count("b-depth"))
     {
         int val;
@@ -136,11 +142,12 @@ int Ultracomm::verify_uparams(const po::variables_map& params)
             throw ParameterMismatchError();
         }
     }
-    return 1;
 }
 
-int Ultracomm::save(const string& outbase)
+void Ultracomm::save()
 {
+    po::variables_map params = uopt.opt;
+    const string outbase = params["output"].as<string>();
 	int num_frames = ult.getCineDataCount((uData)datatype);
     uDataDesc desc;
     if (! ult.getDataDescriptor((uData)datatype, desc))
@@ -210,6 +217,5 @@ int Ultracomm::save(const string& outbase)
         outfile.write(gBuffer, framesize);
     }
     outfile.close();
-    return 1;
 }
 

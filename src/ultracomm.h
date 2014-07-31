@@ -2,6 +2,7 @@
 
 #include <exception>
 #include <boost/program_options.hpp>
+#include "options.h"
 
 namespace po = boost::program_options;
 using namespace std;
@@ -40,17 +41,16 @@ public:
     };
 
     ulterius ult;
+    const UltracommOptions& uopt;
     int datatype;
 
-    Ultracomm();
-    Ultracomm(const string& address);
-    Ultracomm(const po::variables_map& params);
-    void connect(const string& addr);
+    Ultracomm(const UltracommOptions& uopt);
+    void connect();
     void disconnect();
     void freeze();
     void unfreeze();
-    int set_uparams(const po::variables_map& params);
-    int verify_uparams(const po::variables_map& params);
-    int save(const string& outbase);
+    void set_uparams();
+    void verify_uparams();
+    void save();
 };
 
