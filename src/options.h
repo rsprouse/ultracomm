@@ -28,5 +28,4 @@ public:
     };
     
     UltracommOptions(const int& argc, char* argv[]);
-    //void get_program_options(const int& argc, char* argv[]);
 };
