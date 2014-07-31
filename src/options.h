@@ -8,6 +8,7 @@ class UltracommOptions
 
 public:
     po::variables_map opt;
+    po::options_description int_params;
 
     // Throw this one if program should stop when an option is encountered,
     // e.g. --help.
@@ -28,4 +29,5 @@ public:
     };
     
     UltracommOptions(const int& argc, char* argv[]);
+    bool has_int_param(const string& name) const;
 };

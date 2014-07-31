@@ -12,7 +12,7 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt)
 {
     connect();
     ult.setDataToAcquire(datatype);
-    set_uparams();
+    set_int_params();
     verify_uparams();
 }
 
@@ -92,23 +92,31 @@ void Ultracomm::unfreeze()
     }
 }
 
-void Ultracomm::set_uparams()
+void Ultracomm::set_int_params()
 {
     po::variables_map params = uopt.opt;
+    po::options_description iopts = uopt.int_params;
+    for ( auto iter = iopts.options().begin(); iter != iopts.options().end(); ++iter)
+    {
+        /*
+           Ultracomm program options do not contain spaces. Some of the
+           parameters used by the ulterius setParamValue() call do contain
+           spaces, and none appear to use underscore. The convention is that
+           ultracomm program options containing underscore correspond to
+           ulterius parameters that have the same name, but with the
+           underscores replaced with spaces (' ').
 
-    if (params.count("b-depth"))
-    {
-        ult.setParamValue("b-depth", params["b-depth"].as<int>());
+           optname: the name as used in ultracomm program options (underscores)
+           ultname: the name as used by ulterius setParamValue() (spaces)
+        */
+        string optname = (*iter)->long_name();
+        if (params.count(optname)) {
+            int val = params[optname].as<int>();
+            string ultname = boost::replace_all_copy(optname, "_", " ");
+            ult.setParamValue(ultname.c_str(), val);
+        }
     }
-    // TODO: automating this is a pain because of the space in the param name
-    if (params.count("trigger_out"))
-    {
-        ult.setParamValue("trigger out", params["trigger_out"].as<int>());
-    }
-    if (params.count("trigger_out_2"))
-    {
-        ult.setParamValue("trigger out 2", params["trigger_out_2"].as<int>());
-    }
+
 }
 
 void Ultracomm::verify_uparams()

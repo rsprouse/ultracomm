@@ -51,8 +51,9 @@ public:
     void disconnect();
     void freeze();
     void unfreeze();
-    void set_uparams();
+    void set_int_params();
     void verify_uparams();
     void save();
+
 };
 
