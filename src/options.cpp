@@ -23,6 +23,7 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
     global_opts.add_options()
         ("address,a", po::value<string>()->required(), "ultrasonix ip address")
         ("output,O", po::value<string>()->required(), "base output name (including path)")
+        ("datatype", po::value<int>()->required(), "datatype")
     ;
 
     // Options allowed in options file or on command line.
@@ -32,9 +33,17 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
 */
     int_params.add_options()
         ("b-depth", po::value<int>(), "b-depth")
-        ("datatype", po::value<int>()->required(), "datatype")
         ("trigger_out", po::value<int>(), "trigger out")
         ("trigger_out_2", po::value<int>(), "trigger out 2")
+        ("sector", po::value<int>(), "sector")
+        ("b-ldensity", po::value<int>(), "b-ldensity")
+        ("b-focus_count", po::value<int>(), "b-focus_count")
+        ("b-freq", po::value<int>(), "b-freq")
+        ("b-sampl_freq", po::value<int>(), "b-sampl_freq")
+        ("b-persistence", po::value<int>(), "b-persistence")
+        ("soundvelocity", po::value<int>(), "soundvelocity")
+        ("focus_depth", po::value<int>(), "focus_depth")
+        ("image_flip", po::value<int>(), "image_flip")
     ;
 
     // Now combine into full set of command line options.
