@@ -9,6 +9,7 @@
 #include <exception>
 #include <boost/program_options.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include <ulterius.h>
 #include <ulterius_def.h>

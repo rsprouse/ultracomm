@@ -14,7 +14,7 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
     cmdlineonly.add_options()
         ("help,h", "print help message and stop")
         ("version", "print ultracomm version and stop")
-        ("optfile,o", po::value<string>(), "parameter options file (see below)")
+        ("params,p", po::value<string>(), "parameter options file (see below)")
         ("verbose,v", "display informational messages")
     ;
 
@@ -22,7 +22,7 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
     po::options_description global_opts("Ultracomm global options for command line or options file");
     global_opts.add_options()
         ("address,a", po::value<string>()->required(), "ultrasonix ip address")
-        ("output,O", po::value<string>()->required(), "base output name (including path)")
+        ("output,o", po::value<string>()->required(), "output filename")
         ("datatype", po::value<int>()->required(), "datatype")
     ;
 
@@ -63,18 +63,18 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
         throw WantsToStop();
     }
     if (opt.count("version")) {
-        cout << "Version info not implemented.\n";
-        throw WantsToStop();
+        cerr << "Version info not implemented.\n";
+        throw UnimplementedFeatureError();
     }
 
     // Add values from options file, if specified in command line.
-    if (opt.count("optfile")) {
+    if (opt.count("params")) {
         if (opt.count("verbose")) {
-            cout << "verbosity is " << opt.count("verbose") << ".\n";
-            cout << "Using options file " << opt["optfile"].as<string>() << ".\n";
+            cerr << "verbosity is " << opt.count("verbose") << ".\n";
+            cerr << "Using params file " << opt["params"].as<string>() << ".\n";
         }
 
-        ifstream ifs(opt["optfile"].as<string>().c_str());
+        ifstream ifs(opt["params"].as<string>().c_str());
         if (!ifs)
         {
             throw MissingOptionsFileError();
@@ -87,9 +87,24 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
 
     // Will throw exception if error in parameters.
     po::notify(opt);
+
+    // Check that we are working within the limitations of the current 
+    // program implementation.
+    const string ext = ".bpr";
+    if (! boost::algorithm::ends_with(opt["output"].as<string>(), ext))
+    {
+        cerr << "Only .bpr output is supported.\n";
+        throw UnimplementedFeatureError();
+    }
+    if (opt["datatype"].as<int>() != 2)
+    {
+        cerr << "Only datatype 2 is supported.\n";
+        throw UnimplementedFeatureError();
+    }
 }
 
-// Return true if name is among set of param names accepted by ulterius setParamValue(name, int).
+// Return true if name is among set of param names accepted by
+// ulterius setParamValue(name, int).
 bool UltracommOptions::has_int_param(const string& name) const
 {
     try

@@ -28,6 +28,14 @@ public:
         }
     };
     
+    struct UnimplementedFeatureError : public exception
+    {
+      const char * what () const throw ()
+        {
+          return "Option requested a feature that has not been implemented.";
+        }
+    };
+
     UltracommOptions(const int& argc, char* argv[]);
     bool has_int_param(const string& name) const;
 };

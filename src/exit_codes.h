@@ -4,6 +4,9 @@
 // An options file was identified on the command line but can't be accessed.
 #define MISSING_OPTIONS_FILE_ERROR 2
 
+// Program requested a feature that has not been implemented.
+#define UNIMPLEMENTED_FEATURE_ERROR 3
+
 // Could not connect to the Ultrasonix server.
 #define CONNECTION_ERROR 100
 

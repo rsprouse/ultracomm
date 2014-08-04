@@ -37,6 +37,10 @@ int main(int argc, char* argv[])
         cerr << e.what() << "\n";
         return MISSING_OPTIONS_FILE_ERROR;
     }
+    catch(const UltracommOptions::UnimplementedFeatureError& e) {
+        cerr << e.what() << "\n";
+        return UNIMPLEMENTED_FEATURE_ERROR;
+    }
     catch(const Ultracomm::ConnectionError& e) {
         cerr << e.what() << "\n";
         return CONNECTION_ERROR;
