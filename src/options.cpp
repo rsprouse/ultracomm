@@ -107,20 +107,3 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
         throw UnimplementedFeatureError();
     }
 }
-
-// Return true if name is among set of param names accepted by
-// ulterius setParamValue(name, int).
-bool UltracommOptions::has_int_param(const string& name) const
-{
-    try
-    {
-        int_params.find(name, false, false, false);
-        return true;
-    }
-    catch(...)
-    {
-        return false;
-    }
-}
-
-

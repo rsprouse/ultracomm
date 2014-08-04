@@ -37,5 +37,4 @@ public:
     };
 
     UltracommOptions(const int& argc, char* argv[]);
-    bool has_int_param(const string& name) const;
 };
