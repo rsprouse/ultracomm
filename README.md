@@ -19,8 +19,6 @@ Prerequisites:
  - Ultrasonix SDK to match your version of Exam.
 
 
-TODO: have cmake autogenerate a header file with sdk version number and make available from ultracomm (Partially complete, see CMakeLists.txt in top level.)
-
 Compiling
 ---------
 
