@@ -1,4 +1,17 @@
-#define Ulterius_sdk_VERSION_MAJOR @Ulterius_sdk_VERSION_MAJOR@
-#define Ulterius_sdk_VERSION_MINOR @Ulterius_sdk_VERSION_MINOR@
-#define Ulterius_sdk_VERSION_PATCH @Ulterius_sdk_VERSION_PATCH@
-#define Ulterius_sdk_VERSION @Ulterius_sdk_VERSION@
+#ifndef VERSION_CONFIG_H
+#define VERSION_CONFIG_H
+
+// Version info for the ultracomm utility.
+#define ULTRACOMM_VERSION_MAJOR @Ultracomm_VERSION_MAJOR@
+#define ULTRACOMM_VERSION_MINOR @Ultracomm_VERSION_MINOR@
+#define ULTRACOMM_VERSION_PATCH @Ultracomm_VERSION_PATCH@
+#define ULTRACOMM_VERSION "@Ultracomm_VERSION@"
+
+// Version info for the Ultrasonix SDK that ultracomm
+// is compiled against.
+#define ULTERIUS_SDK_VERSION_MAJOR @Ulterius_sdk_VERSION_MAJOR@
+#define ULTERIUS_SDK_VERSION_MINOR @Ulterius_sdk_VERSION_MINOR@
+#define ULTERIUS_SDK_VERSION_PATCH @Ulterius_sdk_VERSION_PATCH@
+#define ULTERIUS_SDK_VERSION "@Ulterius_sdk_VERSION@"
+
+#endif

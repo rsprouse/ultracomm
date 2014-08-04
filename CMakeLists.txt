@@ -26,11 +26,17 @@ INCLUDE_DIRECTORIES("${ULTRASONIX_SDK_PATH}/ulterius/inc" "C:/local/boost_1_55_0
 # See http://www.cmake.org/cmake/help/cmake_tutorial.html for information on
 # making version numbers available in the source code.
 
+# Edit the ultracomm version number.
+SET(Ultracomm_VERSION_MAJOR "0")
+SET(Ultracomm_VERSION_MINOR "1")
+SET(Ultracomm_VERSION_PATCH "0")
+SET(Ultracomm_VERSION "${Ultracomm_VERSION_MAJOR}.${Ultracomm_VERSION_MINOR}.${Ultracomm_VERSION_PATCH}")
+
 # Edit the SDK version number.
-SET(Ulterius_sdk_MAJOR_VERSION "5")
-SET(Ulterius_sdk_MINOR_VERSION "7")
-SET(Ulterius_sdk_PATCH_VERSION "4")
-SET(Ulterius_sdk_VERSION "5.7.4")
+SET(Ulterius_sdk_VERSION_MAJOR "5")
+SET(Ulterius_sdk_VERSION_MINOR "7")
+SET(Ulterius_sdk_VERSION_PATCH "4")
+SET(Ulterius_sdk_VERSION "${Ulterius_sdk_VERSION_MAJOR}.${Ulterius_sdk_VERSION_MINOR}.${Ulterius_sdk_VERSION_PATCH}")
 
 # configure a header file to pass some of the CMake settings to the source code.
 configure_file (

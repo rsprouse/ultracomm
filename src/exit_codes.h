@@ -1,3 +1,8 @@
+#pragma once
+
+// Successful program exit.
+#define EXIT_SUCCESS 0
+
 //  One or more required command line parameters are missing.
 #define MISSING_REQUIRED_OPTION_ERROR 1
 

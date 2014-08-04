@@ -3,8 +3,6 @@
 int main(int argc, char* argv[])
 {
 
-    //string appName = boost::filesystem::basename(argv[0]);
-
     try {
         // Get command line and config file options.
         UltracommOptions uopt = UltracommOptions::UltracommOptions(argc, argv);
@@ -26,8 +24,8 @@ int main(int argc, char* argv[])
         uc.disconnect();
     }
     catch(const UltracommOptions::WantsToStop& e) {   // --help or --version
-        cerr << e.what() << "\n";
-        return 0;
+        e.what();   // Doesn't do much besides avoid unused variable warning.
+        return EXIT_SUCCESS;
     }
     catch(const po::required_option& e) {
         cerr << "Missing required option: " << e.what() << "\n";
@@ -54,7 +52,7 @@ int main(int argc, char* argv[])
         return UNKNOWN_ERROR;
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 

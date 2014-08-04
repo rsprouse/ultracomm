@@ -14,6 +14,7 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
     cmdlineonly.add_options()
         ("help,h", "print help message and stop")
         ("version", "print ultracomm version and stop")
+        ("sdkversion", "print Ultrasonix SDK version used to compile ultracomm and stop")
         ("params,p", po::value<string>(), "parameter options file (see below)")
         ("verbose,v", "display informational messages")
     ;
@@ -63,8 +64,12 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
         throw WantsToStop();
     }
     if (opt.count("version")) {
-        cerr << "Version info not implemented.\n";
-        throw UnimplementedFeatureError();
+        cout << ULTRACOMM_VERSION;
+        throw WantsToStop();
+    }
+    if (opt.count("sdkversion")) {
+        cout << ULTERIUS_SDK_VERSION;
+        throw WantsToStop();
     }
 
     // Add values from options file, if specified in command line.
