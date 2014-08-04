@@ -23,8 +23,8 @@ Compiling
 ---------
 
 1. Edit the CMakeLists.txt file in the root directory of the ultracomm project.
-   Find the lines where ULTRASONIX_SDK_VERSION, ULTRASONIX_SDK_PATH, and ULTERIUS_LIB_NAME
-   are defined and set them to match your version of the Ultrasonix SDK and its location.
+   Find the section for 'Variables that might need to be changed' and see
+   comments embedded there for details of what needs attention.
 
 1. Create a build folder wherever you like on your system.
 
@@ -45,11 +45,6 @@ Compiling
    Open it with Visual Studio 2010. You will see the ultracomm project
    in the Solution Explorer pane.
 
-1. Right-click the ultracomm project, Properties > Configuration Properties > Linker >
-   General > Additional Library Directories > Edit.... Add the location of the boost libraries,
-   e.g. `C:\local\boost_1_55_0\lib32-msvc-10.0`. Click Apply.
-TODO: this should be taken care of by CMake. Figure out how to add boost there.
- 
 1. Right-click the ultracomm project and choose 'Build'. This will compile `ultracomm.exe`.
 
 1. Take note of your build configuration, usually shown on the toolbar below the menu bar.
