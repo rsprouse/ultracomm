@@ -136,7 +136,7 @@ void Ultracomm::verify_uparams()
 void Ultracomm::save()
 {
     po::variables_map params = uopt.opt;
-    const string outbase = params["output"].as<string>();
+    const string outname = params["output"].as<string>();
 	int num_frames = ult.getCineDataCount((uData)datatype);
     uDataDesc desc;
     if (! ult.getDataDescriptor((uData)datatype, desc))
@@ -147,16 +147,30 @@ void Ultracomm::save()
     {
         throw DataError();
     }
-	string outname = outbase;
-    string ext = ".bpr";
-    outname += ext;
     ofstream outfile (outname, ios::out | ios::binary);
+    write_header(outfile, desc, num_frames);
 
-/* **** begin header info **** */
-	/*
-	TODO: header information should be correct for our .bpr files but probably
-	is not correct for other datatypes.
-	*/
+	// TODO: figure out why buffer and sz makes program crash
+    //const int sz = 2 * 1024 * 1024;
+    //char buffer[BUFFERSIZE];  // TODO: determine appropriate sizes on the fly
+//    int num_frames = ult.getCineDataCount((uData)datatype);
+
+	// TODO: framesize assumes desc.ss is always a multiple of 8, and that might not be safe.
+	int framesize = (desc.ss / 8) * desc.w * desc.h;
+    for (int idx = 0; idx < num_frames; idx++)
+    {
+        ult.getCineData((uData)datatype, idx, false, (char**)&gBuffer, BUFFERSIZE);
+        outfile.write(gBuffer, framesize);
+    }
+    outfile.close();
+}
+
+/*
+	TODO: header information is probably correct for .bpr files but probably
+	not for other datatypes.
+*/
+void Ultracomm::write_header(ofstream& outfile, const uDataDesc& desc, const int& num_frames)
+{
 	int isize = sizeof(__int32);
 	outfile.write(reinterpret_cast<const char *>(&(__int32)datatype), isize);
 	outfile.write(reinterpret_cast<const char *>(&(__int32)num_frames), isize);
@@ -191,20 +205,4 @@ void Ultracomm::save()
 	//ult.getParamValue("color-ensemble", extra);
 	extra = 0;   // TODO: figure out what goes here
 	outfile.write(reinterpret_cast<const char *>(&(__int32)extra), isize);
-/* **** end header info **** */
-
-	// TODO: figure out why buffer and sz makes program crash
-    //const int sz = 2 * 1024 * 1024;
-    //char buffer[BUFFERSIZE];  // TODO: determine appropriate sizes on the fly
-//    int num_frames = ult.getCineDataCount((uData)datatype);
-
-	// TODO: framesize assumes desc.ss is always a multiple of 8, and that might not be safe.
-	int framesize = (desc.ss / 8) * desc.w * desc.h;
-    for (int idx = 0; idx < num_frames; idx++)
-    {
-        ult.getCineData((uData)datatype, idx, false, (char**)&gBuffer, BUFFERSIZE);
-        outfile.write(gBuffer, framesize);
-    }
-    outfile.close();
 }
-

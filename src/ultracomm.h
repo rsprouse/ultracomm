@@ -54,6 +54,7 @@ public:
     void set_int_params();
     void verify_uparams();
     void save();
+    void write_header(ofstream& outfile, const uDataDesc& desc, const int& num_frames);
 
 };
 
