@@ -25,6 +25,7 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
         ("address,a", po::value<string>()->required(), "ultrasonix ip address")
         ("output,o", po::value<string>()->required(), "output filename")
         ("datatype", po::value<int>()->required(), "datatype")
+        ("probe-id", po::value<int>(), "probe-id")
     ;
 
     // Options allowed in options file or on command line.

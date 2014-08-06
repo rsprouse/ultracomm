@@ -2,7 +2,6 @@
 
 #define BUFFERSIZE (2 * 1024 * 1024)
 char gBuffer[BUFFERSIZE];
-#define PROBE_ID 19   	// TODO: remove hard-coding of probe id
 
 
 /*
@@ -193,7 +192,7 @@ void Ultracomm::write_header(ofstream& outfile, const uDataDesc& desc, const int
 	outfile.write(reinterpret_cast<const char *>(&(__int32)desc.roi.bry), isize);
 	outfile.write(reinterpret_cast<const char *>(&(__int32)desc.roi.blx), isize);
 	outfile.write(reinterpret_cast<const char *>(&(__int32)desc.roi.bly), isize);
-	int probe_id = PROBE_ID;
+	int probe_id = uopt.opt["probe-id"].as<int>();
 	outfile.write(reinterpret_cast<const char *>(&(__int32)probe_id), isize);
     int txf;
     ult.getParamValue("b-freq", txf);
