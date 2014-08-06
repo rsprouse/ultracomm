@@ -3,6 +3,7 @@
 int main(int argc, char* argv[])
 {
 
+    int exit_status;
     try {
         // Get command line and config file options.
         UltracommOptions uopt = UltracommOptions::UltracommOptions(argc, argv);
@@ -22,37 +23,38 @@ int main(int argc, char* argv[])
 
         // We're done.
         uc.disconnect();
+        exit_status = EXIT_SUCCESS;
     }
     catch(const UltracommOptions::WantsToStop& e) {   // --help or --version
         e.what();   // Doesn't do much besides avoid unused variable warning.
-        return EXIT_SUCCESS;
+        exit_status = EXIT_SUCCESS;
     }
     catch(const po::required_option& e) {
         cerr << "Missing required option: " << e.what() << "\n";
-        return MISSING_REQUIRED_OPTION_ERROR;
+        exit_status = MISSING_REQUIRED_OPTION_ERROR;
     }
     catch(const UltracommOptions::MissingOptionsFileError& e) {
         cerr << e.what() << "\n";
-        return MISSING_OPTIONS_FILE_ERROR;
+        exit_status = MISSING_OPTIONS_FILE_ERROR;
     }
     catch(const UltracommOptions::UnimplementedFeatureError& e) {
         cerr << e.what() << "\n";
-        return UNIMPLEMENTED_FEATURE_ERROR;
+        exit_status = UNIMPLEMENTED_FEATURE_ERROR;
     }
     catch(const Ultracomm::ConnectionError& e) {
         cerr << e.what() << "\n";
-        return CONNECTION_ERROR;
+        exit_status = CONNECTION_ERROR;
     }
     catch(const exception& e) {
         cerr << "Exception: " << e.what() << "\n";
-        return UNKNOWN_ERROR;
+        exit_status = UNKNOWN_ERROR;
     }
     catch(...) {
         cerr << "Unhandled exception of unknown type!\n";
-        return UNKNOWN_ERROR;
+        exit_status = UNKNOWN_ERROR;
     }
 
-    return EXIT_SUCCESS;
+    return exit_status;
 }
 
 
