@@ -71,11 +71,6 @@ void Ultracomm::wait_for_freeze()
     // Wait for server to acknowledge it has frozen.
     // TODO: this would be safer with a timeout.
     while (ult.getFreezeState() != 1) {}
-    if (ult.getFreezeState() != 1)
-    {
-// TODO: throw correct error
-        throw ConnectionError();
-    }
 	ult.setCompressionStatus(1);
 }
 
@@ -92,11 +87,6 @@ void Ultracomm::wait_for_unfreeze()
     // Wait for server to acknowledge it has switched to imaging.
     // TODO: this would be safer with a timeout.
     while (ult.getFreezeState() != 0) {}
-    if (ult.getFreezeState() != 0)
-    {
-// TODO: throw correct error
-        throw ConnectionError();
-    }
 }
 
 /*
