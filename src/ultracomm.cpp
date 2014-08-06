@@ -178,38 +178,44 @@ void Ultracomm::save_data()
 */
 void Ultracomm::write_header(ofstream& outfile, const uDataDesc& desc, const int& num_frames)
 {
-	int isize = sizeof(__int32);
-	outfile.write(reinterpret_cast<const char *>(&(__int32)datatype), isize);
-	outfile.write(reinterpret_cast<const char *>(&(__int32)num_frames), isize);
-	outfile.write(reinterpret_cast<const char *>(&(__int32)desc.w), isize);
-	outfile.write(reinterpret_cast<const char *>(&(__int32)desc.h), isize);
-	outfile.write(reinterpret_cast<const char *>(&(__int32)desc.ss), isize);
-	outfile.write(reinterpret_cast<const char *>(&(__int32)desc.roi.ulx), isize);
-	outfile.write(reinterpret_cast<const char *>(&(__int32)desc.roi.uly), isize);
-	outfile.write(reinterpret_cast<const char *>(&(__int32)desc.roi.urx), isize);
-	outfile.write(reinterpret_cast<const char *>(&(__int32)desc.roi.ury), isize);
-	outfile.write(reinterpret_cast<const char *>(&(__int32)desc.roi.brx), isize);
-	outfile.write(reinterpret_cast<const char *>(&(__int32)desc.roi.bry), isize);
-	outfile.write(reinterpret_cast<const char *>(&(__int32)desc.roi.blx), isize);
-	outfile.write(reinterpret_cast<const char *>(&(__int32)desc.roi.bly), isize);
-	int probe_id = uopt.opt["probe-id"].as<int>();
-	outfile.write(reinterpret_cast<const char *>(&(__int32)probe_id), isize);
-    int txf;
-    ult.getParamValue("b-freq", txf);
-	outfile.write(reinterpret_cast<const char *>(&(__int32)txf), isize);
-    int sf;
-    ult.getParamValue("vec-freq", sf);
-		// TODO: this gives 4000000 instead of 8000000
-	sf = 8000000;
-	outfile.write(reinterpret_cast<const char *>(&(__int32)sf), isize);
-	int dr;
-	ult.getParamValue("frame rate", dr);
-	outfile.write(reinterpret_cast<const char *>(&(__int32)dr), isize);
-	int ld;
-	ult.getParamValue("b-ldensity", ld);
-	outfile.write(reinterpret_cast<const char *>(&(__int32)ld), isize);
-	int extra;
-	//ult.getParamValue("color-ensemble", extra);
-	extra = 0;   // TODO: figure out what goes here
+	const int isize = sizeof(__int32);
+    static const int fields[] = {
+        datatype,
+        num_frames,
+        desc.w,
+        desc.h,
+        desc.ss,
+        desc.roi.ulx,
+        desc.roi.uly,
+        desc.roi.urx,
+        desc.roi.ury,
+        desc.roi.brx,
+        desc.roi.bry,
+        desc.roi.blx,
+        desc.roi.bly
+    };
+    for (int i = 0; i < 13; ++i) {
+	    outfile.write(reinterpret_cast<const char *>(&(__int32)fields[i]), isize);
+    }
+	int probe = uopt.opt["probe-id"].as<int>();
+	outfile.write(reinterpret_cast<const char *>(&(__int32)probe), isize);
+    // FIXME: Determine if these are the correct params to put in the header.
+    static const string queries[] = {
+        "b-freq",
+        "vec-freq",
+        "frame rate",
+        "b-ldensity"
+    };
+    for (int i = 0; i < 4; ++i) {
+        int val;
+        ult.getParamValue(queries[i].c_str(), val);
+	    outfile.write(reinterpret_cast<const char *>(&(__int32)val), isize);
+    }
+    // FIXME: Figure out how to determine the value of the 'extra' field.
+    // It will probably be added to queries[], but I don't know the param name.
+    // For now we'll hard code it with value 0.
+    // Don't forget to update the hard-coded length of queries[] in the for
+    // loop if this field gets moved into queries[].
+    int extra = 0;
 	outfile.write(reinterpret_cast<const char *>(&(__int32)extra), isize);
 }
