@@ -49,11 +49,11 @@ public:
     Ultracomm(const UltracommOptions& uopt);
     void connect();
     void disconnect();
-    void freeze();
-    void unfreeze();
-    void set_int_params();
-    void verify_uparams();
-    void save();
+    void wait_for_freeze();
+    void wait_for_unfreeze();
+    void set_int_imaging_params();
+    void check_int_imaging_params();
+    void save_data();
     void write_header(ofstream& outfile, const uDataDesc& desc, const int& num_frames);
 
 };

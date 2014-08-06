@@ -7,7 +7,7 @@ char gBuffer[BUFFERSIZE];
 
 /*
     Construct Ultracomm object, connect to server,
-    and set/verify parameters.
+    and set/check parameters.
 */
 Ultracomm::Ultracomm(const UltracommOptions& myuopt)
     : uopt(myuopt),
@@ -16,8 +16,8 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt)
 {
     connect();
     ult.setDataToAcquire(datatype);
-    set_int_params();
-    verify_uparams();
+    set_int_imaging_params();
+    check_int_imaging_params();
 }
 
 /*
@@ -61,7 +61,7 @@ void Ultracomm::disconnect()
 /*
   Put Ultrasonix into freeze state and wait for confirmation.
 */
-void Ultracomm::freeze()
+void Ultracomm::wait_for_freeze()
 {
     // 1 = FROZEN; 0 = IMAGING
     if (ult.getFreezeState() != 1)
@@ -82,7 +82,7 @@ void Ultracomm::freeze()
 /*
   Put ultrasonix into imaging state.
 */
-void Ultracomm::unfreeze()
+void Ultracomm::wait_for_unfreeze()
 {
     // 1 = FROZEN; 0 = IMAGING
     if (ult.getFreezeState() != 0)
@@ -100,10 +100,10 @@ void Ultracomm::unfreeze()
 }
 
 /*
-    Set all integer-type Ultrasonix parameters, as specified on the
+    Set all integer-type Ultrasonix imaging parameters, as specified on the
     command line or in the parameter file.
 */
-void Ultracomm::set_int_params()
+void Ultracomm::set_int_imaging_params()
 {
     po::variables_map params = uopt.opt;
     po::options_description iopts = uopt.int_params;
@@ -130,7 +130,11 @@ void Ultracomm::set_int_params()
 
 }
 
-void Ultracomm::verify_uparams()
+/*
+    Verify that integer-type Ultrasonix imaging parameters have value as
+    specified by user.
+*/
+void Ultracomm::check_int_imaging_params()
 {
     po::variables_map params = uopt.opt;
     if (params.count("b-depth"))
@@ -144,7 +148,10 @@ void Ultracomm::verify_uparams()
     }
 }
 
-void Ultracomm::save()
+/*
+    Get data from Ultrasonix and save to file.
+*/
+void Ultracomm::save_data()
 {
     po::variables_map params = uopt.opt;
     const string outname = params["output"].as<string>();

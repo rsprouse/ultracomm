@@ -14,16 +14,16 @@ int main(int argc, char* argv[])
         
         // Connect to Ultrasonix and set parameters.
         Ultracomm uc = Ultracomm::Ultracomm(uopt);
-        uc.freeze();
+        uc.wait_for_freeze();
         
         // Start acquisition, wait for user interaction, then stop.
         cout << "Acquiring images. Press <Enter> to stop.\n";
-        uc.unfreeze();
+        uc.wait_for_unfreeze();
         cin.ignore();  // Wait until <Enter>.
-        uc.freeze();
+        uc.wait_for_freeze();
         
-        // Get data from Ultrasonix and save locally.
-        uc.save();
+        // Get data from Ultrasonix and save to file.
+        uc.save_data();
 
         // We're done.
         uc.disconnect();
