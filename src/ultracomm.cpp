@@ -4,7 +4,11 @@
 char gBuffer[BUFFERSIZE];
 #define PROBE_ID 19   	// TODO: remove hard-coding of probe id
 
-// Construct, connect to server, and set/verify parameters.
+
+/*
+    Construct Ultracomm object, connect to server,
+    and set/verify parameters.
+*/
 Ultracomm::Ultracomm(const UltracommOptions& myuopt)
     : uopt(myuopt),
       address(myuopt.opt["address"].as<string>()),
@@ -43,6 +47,9 @@ ould not connect to Ultrasonix.
 */
 }
 
+/*
+    Disconnect from Ultrasonix.
+*/
 void Ultracomm::disconnect()
 {
     if (ult.isConnected())
@@ -52,7 +59,7 @@ void Ultracomm::disconnect()
 }
 
 /*
-  Put ultrasonix into freeze state and wait for confirmation.
+  Put Ultrasonix into freeze state and wait for confirmation.
 */
 void Ultracomm::freeze()
 {
@@ -92,6 +99,10 @@ void Ultracomm::unfreeze()
     }
 }
 
+/*
+    Set all integer-type Ultrasonix parameters, as specified on the
+    command line or in the parameter file.
+*/
 void Ultracomm::set_int_params()
 {
     po::variables_map params = uopt.opt;
