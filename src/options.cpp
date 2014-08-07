@@ -46,6 +46,8 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
         ("soundvelocity", po::value<int>(), "soundvelocity")
         ("focus_depth", po::value<int>(), "focus_depth")
         ("image_flip", po::value<int>(), "image_flip")
+        ("frame_rate", po::value<int>(), "frame_rate")
+        ("max_frame", po::value<int>(), "max_frame")
     ;
 
     // Now combine into full set of command line options.
