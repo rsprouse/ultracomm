@@ -16,7 +16,7 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
         ("version", "print ultracomm version and stop")
         ("sdkversion", "print Ultrasonix SDK version used to compile ultracomm and stop")
         ("params,p", po::value<string>(), "parameter options file (see below)")
-        ("verbose,v", "display informational messages")
+        ("verbose,v", po::value<int>()->default_value(0), "display informational messages")
     ;
 
     // Options allowed in options file or on command line.
@@ -77,8 +77,8 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
 
     // Add values from options file, if specified in command line.
     if (opt.count("params")) {
-        if (opt.count("verbose")) {
-            cerr << "verbosity is " << opt.count("verbose") << ".\n";
+        if (opt["verbose"].as<int>() > 0) {
+            cerr << "verbosity is " << opt["verbose"].as<int>() << ".\n";
             cerr << "Using params file " << opt["params"].as<string>() << ".\n";
         }
 

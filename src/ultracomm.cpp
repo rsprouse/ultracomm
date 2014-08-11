@@ -11,9 +11,13 @@ char gBuffer[BUFFERSIZE];
 Ultracomm::Ultracomm(const UltracommOptions& myuopt)
     : uopt(myuopt),
       address(myuopt.opt["address"].as<string>()),
-      datatype(myuopt.opt["datatype"].as<int>())
+      datatype(myuopt.opt["datatype"].as<int>()),
+      verbose(myuopt.opt["verbose"].as<int>())
 {
     connect();
+    if (verbose) {
+        cerr << "Setting data to acquire to datatype " << datatype << ".\n";
+    }
     ult.setDataToAcquire(datatype);
     set_int_imaging_params();
     check_int_imaging_params();
@@ -24,6 +28,9 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt)
 */
 void Ultracomm::connect()
 {
+    if (verbose) {
+        cerr << "Connecting to ultrasonix at address " << address << ".\n";
+    }
     if (!ult.connect(address.c_str()))
     {
         throw ConnectionError();
@@ -53,7 +60,16 @@ void Ultracomm::disconnect()
 {
     if (ult.isConnected())
     {
+        if (verbose) {
+            cerr << "Disconnecting from Ultrasonix.\n";
+        }
         ult.disconnect();
+    }
+    else
+    {
+        if (verbose) {
+            cerr << "Already disconnected from Ultrasonix.\n";
+        }
     }
 }
 
@@ -65,11 +81,26 @@ void Ultracomm::wait_for_freeze()
     // 1 = FROZEN; 0 = IMAGING
     if (ult.getFreezeState() != 1)
     {
+        if (verbose) {
+            cerr << "Freezing Ultrasonix.\n";
+        }
         ult.toggleFreeze();
+    }
+    else
+    {
+        if (verbose) {
+            cerr << "Ultrasonix already frozen.\n";
+        }
     }
     // Wait for server to acknowledge it has frozen.
     // TODO: this would be safer with a timeout.
-    while (ult.getFreezeState() != 1) {}
+    while (ult.getFreezeState() != 1)
+    {
+        if (verbose) {
+            cerr << "Waiting for confirmation that Ultrasonix has frozen.\n";
+        }
+    }
+    // FIXME: compression status should be an option.
 	ult.setCompressionStatus(1);
 }
 
@@ -81,11 +112,25 @@ void Ultracomm::wait_for_unfreeze()
     // 1 = FROZEN; 0 = IMAGING
     if (ult.getFreezeState() != 0)
     {
+        if (verbose) {
+            cerr << "Unfreezing Ultrasonix.\n";
+        }
         ult.toggleFreeze();
+    }
+    else
+    {
+        if (verbose) {
+            cerr << "Ultrasonix already imaging.\n";
+        }
     }
     // Wait for server to acknowledge it has switched to imaging.
     // TODO: this would be safer with a timeout.
-    while (ult.getFreezeState() != 0) {}
+    while (ult.getFreezeState() != 0)
+    {
+        if (verbose) {
+            cerr << "Waiting for confirmation that Ultrasonix is imaging.\n";
+        }
+    }
 }
 
 /*
@@ -113,6 +158,9 @@ void Ultracomm::set_int_imaging_params()
         string ultname = boost::replace_all_copy(optname, "_", " ");
         if (params.count(optname)) {
             int val = params[optname].as<int>();
+            if (verbose) {
+                cerr << "Setting '" << ultname << "' to value " << val << ".\n";
+            }
             ult.setParamValue(ultname.c_str(), val);
         }
     }
@@ -137,6 +185,9 @@ void Ultracomm::check_int_imaging_params()
         if (params.count(optname)) {
             int expected, got;
             expected = params[optname].as<int>();
+            if (verbose) {
+                cerr << "Getting value of '" << ultname << "'. Expecting " << expected << ".\n";
+            }
             ult.getParamValue(ultname.c_str(), got);
             if (got != expected) {
                 cerr << "Parameter '" << ultname << "' expected " << expected << " and got " << got << ".\n";
@@ -175,8 +226,14 @@ void Ultracomm::save_data()
 	int framesize = (desc.ss / 8) * desc.w * desc.h;
     for (int idx = 0; idx < num_frames; idx++)
     {
+        if (verbose) {
+            cerr << "Getting cine data for frame '" << idx << ".\n";
+        }
         ult.getCineData((uData)datatype, idx, false, (char**)&gBuffer, BUFFERSIZE);
         outfile.write(gBuffer, framesize);
+        if (verbose) {
+            cerr << "Wrote cine data for frame '" << idx << ".\n";
+        }
     }
     outfile.close();
 }
@@ -187,6 +244,9 @@ void Ultracomm::save_data()
 */
 void Ultracomm::write_header(ofstream& outfile, const uDataDesc& desc, const int& num_frames)
 {
+    if (verbose) {
+        cerr << "Writing header.\n";
+    }
     // Integer fields that we can write directly. Luckily these all are
     // consecutive fields in the header.
 	const int isize = sizeof(__int32);
