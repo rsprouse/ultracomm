@@ -116,7 +116,6 @@ void Ultracomm::set_int_imaging_params()
             ult.setParamValue(ultname.c_str(), val);
         }
     }
-
 }
 
 /*
@@ -173,11 +172,13 @@ void Ultracomm::save_data()
 }
 
 /*
-	TODO: header information is probably correct for .bpr files but probably
+	TODO: header information is probably correct for .bpr files but possibly
 	not for other datatypes.
 */
 void Ultracomm::write_header(ofstream& outfile, const uDataDesc& desc, const int& num_frames)
 {
+    // Integer fields that we can write directly. Luckily these all are
+    // consecutive fields in the header.
 	const int isize = sizeof(__int32);
     static const int fields[] = {
         datatype,
@@ -192,13 +193,15 @@ void Ultracomm::write_header(ofstream& outfile, const uDataDesc& desc, const int
         desc.roi.brx,
         desc.roi.bry,
         desc.roi.blx,
-        desc.roi.bly
+        desc.roi.bly,
+        uopt.opt["probe-id"].as<int>()
     };
-    for (int i = 0; i < 13; ++i) {
+    for (int i = 0; i < sizeof(fields) / sizeof(fields[0]); ++i) {
 	    outfile.write(reinterpret_cast<const char *>(&(__int32)fields[i]), isize);
     }
-	int probe = uopt.opt["probe-id"].as<int>();
-	outfile.write(reinterpret_cast<const char *>(&(__int32)probe), isize);
+
+    // Integer fields that we have to query from Ultrasonix. These are also
+    // consecutive in the header.
     // FIXME: Determine if these are the correct params to put in the header.
     static const string queries[] = {
         "b-freq",
@@ -206,7 +209,7 @@ void Ultracomm::write_header(ofstream& outfile, const uDataDesc& desc, const int
         "frame rate",
         "b-ldensity"
     };
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < sizeof(queries) / sizeof(queries[0]); ++i) {
         int val;
         ult.getParamValue(queries[i].c_str(), val);
 	    outfile.write(reinterpret_cast<const char *>(&(__int32)val), isize);
@@ -214,8 +217,6 @@ void Ultracomm::write_header(ofstream& outfile, const uDataDesc& desc, const int
     // FIXME: Figure out how to determine the value of the 'extra' field.
     // It will probably be added to queries[], but I don't know the param name.
     // For now we'll hard code it with value 0.
-    // Don't forget to update the hard-coded length of queries[] in the for
-    // loop if this field gets moved into queries[].
     int extra = 0;
 	outfile.write(reinterpret_cast<const char *>(&(__int32)extra), isize);
 }
