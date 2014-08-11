@@ -95,7 +95,7 @@ void Ultracomm::wait_for_unfreeze()
 void Ultracomm::set_int_imaging_params()
 {
     po::variables_map params = uopt.opt;
-    po::options_description iopts = uopt.int_params;
+    po::options_description iopts = uopt.int_imaging_params;
     for ( auto iter = iopts.options().begin(); iter != iopts.options().end(); ++iter)
     {
         /*

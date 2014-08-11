@@ -5,7 +5,7 @@
 */
 
 UltracommOptions::UltracommOptions(const int& argc, char* argv[])
-    : int_params("Ultracomm integer parameters")
+    : int_imaging_params("Ultracomm integer parameters")
 {
     //string appName = boost::filesystem::basename(argv[0]);
 
@@ -31,9 +31,9 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
     // Options allowed in options file or on command line.
 /*
     NOTE: this one is now in the initialization list
-    po::options_description int_params("Ultracomm integer parameters");
+    po::options_description int_imaging_params("Ultracomm integer imaging parameters");
 */
-    int_params.add_options()
+    int_imaging_params.add_options()
         ("b-depth", po::value<int>(), "b-depth")
         ("trigger_out", po::value<int>(), "trigger out")
         ("trigger_out_2", po::value<int>(), "trigger out 2")
@@ -52,11 +52,11 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
 
     // Now combine into full set of command line options.
     po::options_description cmdline_options;
-    cmdline_options.add(cmdlineonly).add(global_opts).add(int_params);
+    cmdline_options.add(cmdlineonly).add(global_opts).add(int_imaging_params);
 
     // And a full set of options file options.
     po::options_description cmd_or_file;
-    cmd_or_file.add(global_opts).add(int_params);
+    cmd_or_file.add(global_opts).add(int_imaging_params);
 
     // Read command line options into opt.
     po::store(po::parse_command_line(argc, argv, cmdline_options), opt);

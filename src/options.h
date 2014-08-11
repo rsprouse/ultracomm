@@ -8,7 +8,7 @@ class UltracommOptions
 
 public:
     po::variables_map opt;
-    po::options_description int_params;
+    po::options_description int_imaging_params;
 
     // Throw this one if program should stop when an option is encountered,
     // e.g. --help.
