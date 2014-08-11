@@ -292,7 +292,7 @@ void Ultracomm::write_header(ofstream& outfile, const uDataDesc& desc, const int
         uopt.opt["probe-id"].as<int>()
     };
     for (int i = 0; i < sizeof(fields) / sizeof(fields[0]); ++i) {
-    outfile.write(reinterpret_cast<const char *>(&(__int32)fields[i]), isize);
+        outfile.write(reinterpret_cast<const char *>(&(__int32)fields[i]), isize);
     }
 
     // Integer fields that we have to query from Ultrasonix. These are also
