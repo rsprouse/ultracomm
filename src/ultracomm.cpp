@@ -21,6 +21,14 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt)
     ult.setDataToAcquire(datatype);
     set_int_imaging_params();
     check_int_imaging_params();
+    const int compstat = uopt.opt["compression_status"].as<int>();
+    if (verbose) {
+        cerr << "Setting compression status to " << compstat << ".\n";
+    }
+	if (! ult.setCompressionStatus(compstat)) {
+        cerr << "Failed to set compression status to " << compstat << ".\n";
+        throw ParameterMismatchError();
+    }
 }
 
 /*
@@ -119,9 +127,6 @@ void Ultracomm::wait_for_freeze()
     {
         Sleep(uopt.opt["ms_delay_after_freeze"].as<int>());
     }
-
-    // FIXME: compression status should be an option.
-	ult.setCompressionStatus(1);
 }
 
 /*
