@@ -252,12 +252,12 @@ void Ultracomm::save_data()
     for (int idx = 0; idx < num_frames; idx++)
     {
         if (verbose) {
-            cerr << "Getting cine data for frame '" << idx << ".\n";
+            cerr << "Getting cine data for frame " << idx << ".\n";
         }
         ult.getCineData((uData)datatype, idx, false, (char**)&gBuffer, BUFFERSIZE);
         outfile.write(gBuffer, framesize);
         if (verbose) {
-            cerr << "Wrote cine data for frame '" << idx << ".\n";
+            cerr << "Wrote cine data for frame " << idx << ".\n";
         }
     }
     outfile.close();
