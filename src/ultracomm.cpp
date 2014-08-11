@@ -1,5 +1,8 @@
 #include "StdAfx.h"
 
+#define BUFFERSIZE (2 * 1024 * 1024)
+char gBuffer[BUFFERSIZE];
+
 
 /*
     Construct Ultracomm object, connect to server,

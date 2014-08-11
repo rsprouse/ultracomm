@@ -7,8 +7,6 @@
 namespace po = boost::program_options;
 using namespace std;
 
-#define BUFFERSIZE (2 * 1024 * 1024)
-char gBuffer[BUFFERSIZE];
 
 class Ultracomm
 {
