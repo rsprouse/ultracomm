@@ -100,6 +100,26 @@ void Ultracomm::wait_for_freeze()
             cerr << "Waiting for confirmation that Ultrasonix has frozen.\n";
         }
     }
+    /*
+       FIXME: Occasionally we get the message
+
+           sendAndWait(): WaitForSingleObject() ret WAIT_TIMEOUT 
+
+       when retrieving cine data. When --verbose is turned on this message
+       usually appears in save_data() after the call to getCineData() and
+       before write(). According to the discussion at
+       http://research.ultrasonix.com/viewtopic.php?f=5&t=1100&p=4245&hilit=delay#p4245
+       adding a delay after toggleFreeze() can prevent this condition, so
+       we add it here.
+
+       Possibly this delay is not necessary when used with newer versions of
+       the Ultrasonix library.
+    */
+    if (uopt.opt["ms_delay_after_freeze"].as<int>() > 0)
+    {
+        Sleep(uopt.opt["ms_delay_after_freeze"].as<int>());
+    }
+
     // FIXME: compression status should be an option.
 	ult.setCompressionStatus(1);
 }

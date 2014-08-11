@@ -16,7 +16,6 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
         ("version", "print ultracomm version and stop")
         ("sdkversion", "print Ultrasonix SDK version used to compile ultracomm and stop")
         ("params,p", po::value<string>(), "parameter options file (see below)")
-        ("verbose,v", po::value<int>()->default_value(0), "display informational messages")
     ;
 
     // Options allowed in options file or on command line.
@@ -26,6 +25,8 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
         ("output,o", po::value<string>()->required(), "output filename")
         ("datatype", po::value<int>()->required(), "datatype")
         ("probe-id", po::value<int>(), "probe-id")
+        ("verbose,v", po::value<int>()->default_value(0), "display informational messages")
+        ("ms_delay_after_freeze", po::value<int>()->default_value(0), "force ultrasonix to wait to acquire cine data after freezing (ms)")
     ;
 
     // Options allowed in options file or on command line.
@@ -46,7 +47,9 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
         ("soundvelocity", po::value<int>(), "soundvelocity")
         ("focus_depth", po::value<int>(), "focus_depth")
         ("image_flip", po::value<int>(), "image_flip")
+        // FIXME: is frame_rate a settable parameter?
         ("frame_rate", po::value<int>(), "frame_rate")
+        // FIXME: is max_frame a settable parameter?
         ("max_frame", po::value<int>(), "max_frame")
     ;
 
