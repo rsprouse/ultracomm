@@ -110,9 +110,9 @@ void Ultracomm::set_int_imaging_params()
            ultname: the name as used by ulterius setParamValue() (spaces)
         */
         string optname = (*iter)->long_name();
+        string ultname = boost::replace_all_copy(optname, "_", " ");
         if (params.count(optname)) {
             int val = params[optname].as<int>();
-            string ultname = boost::replace_all_copy(optname, "_", " ");
             ult.setParamValue(ultname.c_str(), val);
         }
     }
@@ -125,13 +125,23 @@ void Ultracomm::set_int_imaging_params()
 void Ultracomm::check_int_imaging_params()
 {
     po::variables_map params = uopt.opt;
-    if (params.count("b-depth"))
+    po::options_description iopts = uopt.int_imaging_params;
+    for ( auto iter = iopts.options().begin(); iter != iopts.options().end(); ++iter)
     {
-        int val;
-        ult.getParamValue("b-depth", val);
-        if (val != params["b-depth"].as<int>())
-        {
-            throw ParameterMismatchError();
+        /*
+           See comments in set_int_imaging_params() for mangling of
+           parameter names.
+        */
+        string optname = (*iter)->long_name();
+        string ultname = boost::replace_all_copy(optname, "_", " ");
+        if (params.count(optname)) {
+            int expected, got;
+            expected = params[optname].as<int>();
+            ult.getParamValue(ultname.c_str(), got);
+            if (got != expected) {
+                cerr << "Parameter '" << ultname << "' expected " << expected << " and got " << got << ".\n";
+                throw ParameterMismatchError();
+            }
         }
     }
 }
