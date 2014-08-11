@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
         uc.wait_for_freeze();
         
         // Start acquisition, wait for user interaction, then stop.
-        cout << "Acquiring images. Press <Enter> to stop.\n";
+        cout << "*** Acquiring images. Press <Enter> to stop. ***\n";
         uc.wait_for_unfreeze();
         cin.ignore();  // Wait until <Enter>.
         uc.wait_for_freeze();
