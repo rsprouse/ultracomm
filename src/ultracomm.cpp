@@ -25,7 +25,7 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt)
     if (verbose) {
         cerr << "Setting compression status to " << compstat << ".\n";
     }
-	if (! ult.setCompressionStatus(compstat)) {
+    if (! ult.setCompressionStatus(compstat)) {
         cerr << "Failed to set compression status to " << compstat << ".\n";
         throw ParameterMismatchError();
     }
@@ -229,7 +229,7 @@ void Ultracomm::save_data()
 {
     po::variables_map params = uopt.opt;
     const string outname = params["output"].as<string>();
-	int num_frames = ult.getCineDataCount((uData)datatype);
+    int num_frames = ult.getCineDataCount((uData)datatype);
     uDataDesc desc;
     if (! ult.getDataDescriptor((uData)datatype, desc))
     {
@@ -242,13 +242,13 @@ void Ultracomm::save_data()
     ofstream outfile (outname, ios::out | ios::binary);
     write_header(outfile, desc, num_frames);
 
-	// TODO: figure out why buffer and sz makes program crash
+    // TODO: figure out why buffer and sz makes program crash
     //const int sz = 2 * 1024 * 1024;
     //char buffer[BUFFERSIZE];  // TODO: determine appropriate sizes on the fly
 //    int num_frames = ult.getCineDataCount((uData)datatype);
 
-	// TODO: framesize assumes desc.ss is always a multiple of 8, and that might not be safe.
-	int framesize = (desc.ss / 8) * desc.w * desc.h;
+    // TODO: framesize assumes desc.ss is always a multiple of 8, and that might not be safe.
+    int framesize = (desc.ss / 8) * desc.w * desc.h;
     for (int idx = 0; idx < num_frames; idx++)
     {
         if (verbose) {
@@ -264,8 +264,8 @@ void Ultracomm::save_data()
 }
 
 /*
-	TODO: header information is probably correct for .bpr files but possibly
-	not for other datatypes.
+    TODO: header information is probably correct for .bpr files but possibly
+    not for other datatypes.
 */
 void Ultracomm::write_header(ofstream& outfile, const uDataDesc& desc, const int& num_frames)
 {
@@ -274,7 +274,7 @@ void Ultracomm::write_header(ofstream& outfile, const uDataDesc& desc, const int
     }
     // Integer fields that we can write directly. Luckily these all are
     // consecutive fields in the header.
-	const int isize = sizeof(__int32);
+    const int isize = sizeof(__int32);
     static const int fields[] = {
         datatype,
         num_frames,
@@ -292,7 +292,7 @@ void Ultracomm::write_header(ofstream& outfile, const uDataDesc& desc, const int
         uopt.opt["probe-id"].as<int>()
     };
     for (int i = 0; i < sizeof(fields) / sizeof(fields[0]); ++i) {
-	    outfile.write(reinterpret_cast<const char *>(&(__int32)fields[i]), isize);
+    outfile.write(reinterpret_cast<const char *>(&(__int32)fields[i]), isize);
     }
 
     // Integer fields that we have to query from Ultrasonix. These are also
@@ -307,11 +307,11 @@ void Ultracomm::write_header(ofstream& outfile, const uDataDesc& desc, const int
     for (int i = 0; i < sizeof(queries) / sizeof(queries[0]); ++i) {
         int val;
         ult.getParamValue(queries[i].c_str(), val);
-	    outfile.write(reinterpret_cast<const char *>(&(__int32)val), isize);
+        outfile.write(reinterpret_cast<const char *>(&(__int32)val), isize);
     }
     // FIXME: Figure out how to determine the value of the 'extra' field.
     // It will probably be added to queries[], but I don't know the param name.
     // For now we'll hard code it with value 0.
     int extra = 0;
-	outfile.write(reinterpret_cast<const char *>(&(__int32)extra), isize);
+    outfile.write(reinterpret_cast<const char *>(&(__int32)extra), isize);
 }
