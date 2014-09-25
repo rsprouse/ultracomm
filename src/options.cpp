@@ -48,6 +48,7 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
         ("soundvelocity", po::value<int>(), "soundvelocity")
         ("focus_depth", po::value<int>(), "focus_depth")
         ("image_flip", po::value<int>(), "image_flip")
+        ("max_fr", po::value<int>(), "max_fr; Fr Limit")
         // FIXME: is frame_rate a settable parameter?
         ("frame_rate", po::value<int>(), "frame_rate")
         // FIXME: is max_frame a settable parameter?
