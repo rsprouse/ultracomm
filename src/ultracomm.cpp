@@ -2,6 +2,7 @@
 
 #define BUFFERSIZE (2 * 1024 * 1024)
 char gBuffer[BUFFERSIZE];
+int lastFrame = -1;
 
 
 /*
@@ -11,6 +12,7 @@ char gBuffer[BUFFERSIZE];
 Ultracomm::Ultracomm(const UltracommOptions& myuopt)
     : uopt(myuopt),
       address(myuopt.opt["address"].as<string>()),
+      acqmode(myuopt.opt["acqmode"].as<string>()),
       datatype(myuopt.opt["datatype"].as<int>()),
       verbose(myuopt.opt["verbose"].as<int>())
 {
@@ -24,6 +26,9 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt)
     const int compstat = uopt.opt["compression_status"].as<int>();
     if (verbose) {
         cerr << "Setting compression status to " << compstat << ".\n";
+    }
+    if (acqmode == "continuous") {
+        ult.setCallback(frame_callback);
     }
     if (! ult.setCompressionStatus(compstat)) {
         cerr << "Failed to set compression status to " << compstat << ".\n";
@@ -66,6 +71,10 @@ ould not connect to Ultrasonix.
 */
 void Ultracomm::disconnect()
 {
+    cout << "Disconnecting.\n";
+    if (acqmode == "continuous") {
+        printf("Last frame was %d.\n", lastFrame);
+    }
     if (ult.isConnected())
     {
         if (verbose) {
@@ -314,4 +323,40 @@ void Ultracomm::write_header(ofstream& outfile, const uDataDesc& desc, const int
     // For now we'll hard code it with value 0.
     int extra = 0;
     outfile.write(reinterpret_cast<const char *>(&(__int32)extra), isize);
+}
+
+/*
+    Callback.
+*/
+bool Ultracomm::frame_callback(void* data, int type, int sz, bool cine, int frmnum)
+{
+/*
+    if (verbose) {
+        cerr << "In callback.\n";
+    }
+
+    if (!data || !sz)
+    {
+// TODO: proper error
+        printf("Error: no actual frame data received\n");
+        return false;
+    }
+
+    if (BUFFERSIZE < sz)
+    {
+// TODO: proper error
+        printf("Error: frame too large for current buffer\n");
+        return false;
+    }
+*/
+
+    //printf("[Rx] type:(%d) size:(%d) cine:(%d) gBuffer:(%d) frame:(%d)\n", type, sz, cine, &gBuffer, frmnum);
+    if (frmnum != lastFrame + 1) {
+        printf("Skipped frame(s) %d - %d.\n", lastFrame + 1, frmnum - 1);
+    }
+    lastFrame = frmnum;
+    // make sure we dont do an operation that takes longer than the acquisition frame rate
+    memcpy(gBuffer, data, sz);
+
+    return true;
 }

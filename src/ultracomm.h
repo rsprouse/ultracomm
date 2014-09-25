@@ -13,6 +13,7 @@ class Ultracomm
     ulterius ult;                  // interface to Ultrasonix dll
     const UltracommOptions& uopt;  // program options
     const string address;          // IP address of Ultrasonix machine
+    const string acqmode;          // acquisition mode ("continuous"|"buffered")
     const int datatype;            // type of data to acquire and save
     const int verbose;             // verbosity
 
@@ -56,6 +57,7 @@ public:
     void check_int_imaging_params();
     void save_data();
     void write_header(ofstream& outfile, const uDataDesc& desc, const int& num_frames);
+    static bool frame_callback(void* data, int type, int sz, bool cine, int frmnum);
 
 };
 

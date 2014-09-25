@@ -22,8 +22,10 @@ int main(int argc, char* argv[])
         cin.ignore();  // Wait until <Enter>.
         uc.wait_for_freeze();
         
-        // Get data from Ultrasonix and save to file.
-        uc.save_data();
+        if (uopt.opt["acqmode"].as<string>() == "buffered") {
+            // Get data from Ultrasonix and save to file.
+            uc.save_data();
+        }
 
         // We're done.
         uc.disconnect();
