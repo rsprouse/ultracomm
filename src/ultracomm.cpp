@@ -3,7 +3,15 @@
 #define BUFFERSIZE (2 * 1024 * 1024)
 char gBuffer[BUFFERSIZE];
 int lastFrame = -1;
+int framesReceived = -1;
 
+/*
+   The Ultracomm object is not available in the callback, so we copy some of
+   its attributes into file-local variables that the callback can access.
+*/
+ofstream* mystream;
+int myframesize;
+ofstream* myindexstream;
 
 /*
     Construct Ultracomm object, connect to server,
@@ -14,6 +22,8 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt)
       address(myuopt.opt["address"].as<string>()),
       acqmode(myuopt.opt["acqmode"].as<string>()),
       datatype(myuopt.opt["datatype"].as<int>()),
+//      outname(myuopt.opt["output"].as<string>()),
+//      outfile(outname, ios::out | ios::binary),
       verbose(myuopt.opt["verbose"].as<int>())
 {
     connect();
@@ -27,12 +37,31 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt)
     if (verbose) {
         cerr << "Setting compression status to " << compstat << ".\n";
     }
-    if (acqmode == "continuous") {
-        ult.setCallback(frame_callback);
-    }
+
     if (! ult.setCompressionStatus(compstat)) {
         cerr << "Failed to set compression status to " << compstat << ".\n";
         throw ParameterMismatchError();
+    }
+    if (! ult.getDataDescriptor((uData)datatype, desc))
+    {
+        throw DataDescriptorError();
+    }
+    if (! ult.isDataAvailable((uData)datatype))
+    {
+        throw DataError();
+    }
+    // TODO: framesize assumes desc.ss is always a multiple of 8, and that might not be safe.
+    framesize = (desc.ss / 8) * desc.w * desc.h;
+    myframesize = framesize;
+    std::string outname = myuopt.opt["output"].as<string>();
+    outfile.open(outname, ios::out | ios::binary),
+    mystream = &outfile;
+    std::string outindexname = outname + ".idx";
+    outindexfile.open(outindexname, ios::out | ios::binary);
+    myindexstream = &outindexfile;
+    if (acqmode == "continuous") {
+        ult.setCallback(frame_callback);
+        write_header(outfile, desc, 0);
     }
 }
 
@@ -48,6 +77,18 @@ void Ultracomm::connect()
     {
         throw ConnectionError();
     }
+    // Stop streaming, if necessary.
+    //if (ult.getStreamStatus()) {
+    //    ult.stopStream();
+    //}
+/*
+    int imgmode = ult.getActiveImagingMode();
+    cout << "Imaging mode is " << imgmode << ".\n";
+    bool im = ult.getInjectMode();
+    cout << "Inject mode is " << im << ".\n";
+    bool ss = ult.getStreamStatus();
+    cout << "Stream status is " << ss << ".\n";
+*/
 /*
 TODO: throw different errors depending on problem. Note that FD_CONNECT error
 is when server address is bad (e.g. 123), and SOCKET_ERROR is when we couldn't connect
@@ -73,7 +114,11 @@ void Ultracomm::disconnect()
 {
     cout << "Disconnecting.\n";
     if (acqmode == "continuous") {
-        printf("Last frame was %d.\n", lastFrame);
+        write_numframes_in_header(outfile, framesReceived);
+        outfile.close();
+        //printf("Last frame was %d.\n", lastFrame);
+        double pct = 100.0 * framesReceived / (lastFrame+1);
+        printf("Acquired %d of %d frames (%0.4f percent).\n", framesReceived, lastFrame+1, pct);
     }
     if (ult.isConnected())
     {
@@ -236,19 +281,7 @@ void Ultracomm::check_int_imaging_params()
 */
 void Ultracomm::save_data()
 {
-    po::variables_map params = uopt.opt;
-    const string outname = params["output"].as<string>();
     int num_frames = ult.getCineDataCount((uData)datatype);
-    uDataDesc desc;
-    if (! ult.getDataDescriptor((uData)datatype, desc))
-    {
-        throw DataDescriptorError();
-    }
-    if (! ult.isDataAvailable((uData)datatype))
-    {
-        throw DataError();
-    }
-    ofstream outfile (outname, ios::out | ios::binary);
     write_header(outfile, desc, num_frames);
 
     // TODO: figure out why buffer and sz makes program crash
@@ -256,8 +289,6 @@ void Ultracomm::save_data()
     //char buffer[BUFFERSIZE];  // TODO: determine appropriate sizes on the fly
 //    int num_frames = ult.getCineDataCount((uData)datatype);
 
-    // TODO: framesize assumes desc.ss is always a multiple of 8, and that might not be safe.
-    int framesize = (desc.ss / 8) * desc.w * desc.h;
     for (int idx = 0; idx < num_frames; idx++)
     {
         if (verbose) {
@@ -326,6 +357,17 @@ void Ultracomm::write_header(ofstream& outfile, const uDataDesc& desc, const int
 }
 
 /*
+    TODO: kind of a hack.
+*/
+void Ultracomm::write_numframes_in_header(ofstream& outfile, const int& num_frames)
+{
+    const int isize = sizeof(__int32);
+    outfile.seekp(isize);
+    outfile.write(reinterpret_cast<const char *>(&(__int32)num_frames), isize);
+}
+
+
+/*
     Callback.
 */
 bool Ultracomm::frame_callback(void* data, int type, int sz, bool cine, int frmnum)
@@ -351,12 +393,20 @@ bool Ultracomm::frame_callback(void* data, int type, int sz, bool cine, int frmn
 */
 
     //printf("[Rx] type:(%d) size:(%d) cine:(%d) gBuffer:(%d) frame:(%d)\n", type, sz, cine, &gBuffer, frmnum);
+//    printf("%d\n", frmnum);
+/*
     if (frmnum != lastFrame + 1) {
         printf("Skipped frame(s) %d - %d.\n", lastFrame + 1, frmnum - 1);
     }
+*/
     lastFrame = frmnum;
+    framesReceived++;
     // make sure we dont do an operation that takes longer than the acquisition frame rate
-    memcpy(gBuffer, data, sz);
+    //memcpy(gBuffer, data, sz);
+    std::string frmint = std::to_string(long double(frmnum)) + "\n";
+    myindexstream->write(frmint.c_str(), frmint.size());
+    mystream->write((const char*)data, sz);
+    myindexstream->write(frmint.c_str(), frmint.size());
 
     return true;
 }

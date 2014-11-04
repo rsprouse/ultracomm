@@ -15,6 +15,10 @@ class Ultracomm
     const string address;          // IP address of Ultrasonix machine
     const string acqmode;          // acquisition mode ("continuous"|"buffered")
     const int datatype;            // type of data to acquire and save
+    ofstream outfile;              // output ofstream
+    ofstream outindexfile;         // output of indexes ofstream
+    uDataDesc desc;                // data descriptor
+    int framesize;           // size of frame image
     const int verbose;             // verbosity
 
 public:
@@ -57,6 +61,7 @@ public:
     void check_int_imaging_params();
     void save_data();
     void write_header(ofstream& outfile, const uDataDesc& desc, const int& num_frames);
+    void write_numframes_in_header(ofstream& outfile, const int& num_frames);
     static bool frame_callback(void* data, int type, int sz, bool cine, int frmnum);
 
 };
