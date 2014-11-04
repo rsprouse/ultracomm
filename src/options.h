@@ -36,5 +36,13 @@ public:
         }
     };
 
+    struct MissingRequiredOptionError : public exception
+    {
+      const char * what () const throw ()
+        {
+          return "A required option has not been specified.";
+        }
+    };
+
     UltracommOptions(const int& argc, char* argv[]);
 };

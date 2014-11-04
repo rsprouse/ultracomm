@@ -22,7 +22,7 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
     po::options_description global_opts("Ultracomm global options for command line or options file");
     global_opts.add_options()
         ("address,a", po::value<string>()->required(), "ultrasonix ip address")
-        ("output,o", po::value<string>()->required(), "output filename")
+        ("output,o", po::value<string>()->default_value(""), "output filename")
         ("acqmode", po::value<string>()->required(), "acquisition mode")
         ("datatype", po::value<int>()->required(), "datatype")
         ("probe-id", po::value<int>(), "probe-id")
@@ -104,6 +104,10 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
 
     // Check that we are working within the limitations of the current 
     // program implementation.
+    if (opt["output"].as<string>() == "") {
+        cerr << "No output file specified. Quitting.\n";
+        throw MissingRequiredOptionError();
+    }
     const string ext = ".bpr";
     if (! boost::algorithm::ends_with(opt["output"].as<string>(), ext))
     {
