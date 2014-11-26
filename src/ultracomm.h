@@ -53,6 +53,7 @@ public:
     void disconnect();
     void wait_for_freeze();
     void wait_for_unfreeze();
+    void dump_params();
     void set_int_imaging_params();
     void check_int_imaging_params();
     void save_data();

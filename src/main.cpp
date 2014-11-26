@@ -16,15 +16,20 @@ int main(int argc, char* argv[])
         Ultracomm uc = Ultracomm::Ultracomm(uopt);
         uc.wait_for_freeze();
         
-        // Start acquisition, wait for user interaction, then stop.
-        uc.wait_for_unfreeze();
-        cout << "*** Acquiring images. Press <Enter> to stop. ***\n";
-        cin.ignore();  // Wait until <Enter>.
-        uc.wait_for_freeze();
-        
-        if (uopt.opt["acqmode"].as<string>() == "buffered") {
-            // Get data from Ultrasonix and save to file.
-            uc.save_data();
+        if (uopt.opt.count("dump-params")) {
+            uc.dump_params();
+        }
+        else if (! uopt.opt.count("freeze-only")) {
+            // Start acquisition, wait for user interaction, then stop.
+            uc.wait_for_unfreeze();
+            cout << "*** Acquiring images. Press <Enter> to stop. ***\n";
+            cin.ignore();  // Wait until <Enter>.
+            uc.wait_for_freeze();
+            
+            if (uopt.opt["acqmode"].as<string>() == "buffered") {
+                // Get data from Ultrasonix and save to file.
+                uc.save_data();
+            }
         }
 
         // We're done.

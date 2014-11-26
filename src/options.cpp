@@ -14,6 +14,8 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
     cmdlineonly.add_options()
         ("help,h", "print help message and stop")
         ("version", "print ultracomm version and stop")
+        ("freeze-only", "send freeze command to ultrasonix and stop")
+        ("dump-params", "print current ultrasonix parameter values and stop")
         ("sdkversion", "print Ultrasonix SDK version used to compile ultracomm and stop")
         ("params,p", po::value<string>(), "parameter options file (see below)")
     ;
@@ -23,8 +25,8 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
     global_opts.add_options()
         ("address,a", po::value<string>()->required(), "ultrasonix ip address")
         ("output,o", po::value<string>()->default_value(""), "output filename")
-        ("acqmode", po::value<string>()->required(), "acquisition mode")
-        ("datatype", po::value<int>()->required(), "datatype")
+        ("acqmode", po::value<string>()->default_value("continuous"), "acquisition mode")
+        ("datatype", po::value<int>()->default_value(2), "datatype")
         ("probe-id", po::value<int>(), "probe-id")
         ("verbose,v", po::value<int>()->default_value(0), "display informational messages")
         ("ms_delay_after_freeze", po::value<int>()->default_value(0), "force ultrasonix to wait to acquire cine data after freezing (ms)")
@@ -104,19 +106,21 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
 
     // Check that we are working within the limitations of the current 
     // program implementation.
-    if (opt["output"].as<string>() == "") {
-        cerr << "No output file specified. Quitting.\n";
-        throw MissingRequiredOptionError();
-    }
-    const string ext = ".bpr";
-    if (! boost::algorithm::ends_with(opt["output"].as<string>(), ext))
-    {
-        cerr << "Only .bpr output is supported.\n";
-        throw UnimplementedFeatureError();
-    }
-    if (opt["datatype"].as<int>() != 2)
-    {
-        cerr << "Only datatype 2 is supported.\n";
-        throw UnimplementedFeatureError();
+    if (! (opt.count("freeze-only") || opt.count("dump-params"))) {
+        if (opt["output"].as<string>() == "") {
+            cerr << "No output file specified. Quitting.\n";
+            throw MissingRequiredOptionError();
+        }
+        const string ext = ".bpr";
+        if (! boost::algorithm::ends_with(opt["output"].as<string>(), ext))
+        {
+            cerr << "Only .bpr output is supported.\n";
+            throw UnimplementedFeatureError();
+        }
+        if (opt["datatype"].as<int>() != 2)
+        {
+            cerr << "Only datatype 2 is supported.\n";
+            throw UnimplementedFeatureError();
+        }
     }
 }

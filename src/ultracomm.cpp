@@ -71,10 +71,6 @@ ould not connect to Ultrasonix.
 */
 void Ultracomm::disconnect()
 {
-    cout << "Disconnecting.\n";
-    if (acqmode == "continuous") {
-        printf("Last frame was %d.\n", lastFrame);
-    }
     if (ult.isConnected())
     {
         if (verbose) {
@@ -132,7 +128,10 @@ void Ultracomm::wait_for_freeze()
        Possibly this delay is not necessary when used with newer versions of
        the Ultrasonix library.
     */
-    if (uopt.opt["ms_delay_after_freeze"].as<int>() > 0)
+    if (
+           uopt.opt["ms_delay_after_freeze"].as<int>() > 0 &&
+           !uopt.opt.count("freeze-only")
+    )
     {
         Sleep(uopt.opt["ms_delay_after_freeze"].as<int>());
     }
@@ -164,6 +163,21 @@ void Ultracomm::wait_for_unfreeze()
         if (verbose) {
             cerr << "Waiting for confirmation that Ultrasonix is imaging.\n";
         }
+    }
+}
+
+/*
+    Print all ultrasonix parameters.
+*/
+void Ultracomm::dump_params()
+{
+    int i = 0;
+    int val;
+    uParam param;
+    while (ult.getParam(i++, param))
+    {
+        ult.getParamValue(param.name, val);
+        printf("%d\t%s\t%s\t%d\n", i, param.id, param.name, val);
     }
 }
 
