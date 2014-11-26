@@ -174,10 +174,20 @@ void Ultracomm::dump_params()
     int i = 0;
     int val;
     uParam param;
+    cout << "index\tparam.id\tvalue\tparam.name\tparam.source\tparam.type\n";
     while (ult.getParam(i++, param))
     {
-        ult.getParamValue(param.name, val);
-        printf("%d\t%s\t%s\t%d\n", i, param.id, param.name, val);
+        // TODO: Learn about different param types and how to get their values.
+        // This probably doesn't work properly for non-integer param values.
+        // Have not been able to get getParamValue() to return false either.
+        if (ult.getParamValue(param.id, val))
+        {
+            cout << i << "\t" << param.id << "\t" << val << "\t" << param.name << "\t" << param.source << "\t" << param.type << "\t" << param.unit << "\n";
+        }
+        else
+        {
+            cerr << i << "\t'" << param.id << "'\t" << param.name << "\tFAILED\n";
+        }
     }
 }
 
@@ -233,10 +243,10 @@ void Ultracomm::check_int_imaging_params()
         if (params.count(optname)) {
             int expected, got;
             expected = params[optname].as<int>();
-            if (verbose) {
-                cerr << "Getting value of '" << ultname << "'. Expecting " << expected << ".\n";
-            }
             ult.getParamValue(ultname.c_str(), got);
+            if (verbose) {
+                cerr << "Got value of '" << ultname << "'. Expected " << expected << " and got " << got << ".\n";
+            }
             if (got != expected) {
                 cerr << "Parameter '" << ultname << "' expected " << expected << " and got " << got << ".\n";
                 throw ParameterMismatchError();
