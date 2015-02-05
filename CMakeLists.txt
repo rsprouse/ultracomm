@@ -8,18 +8,18 @@ INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/common.cmake)
 
 ## Ultrasonix SDK ##
 # Location of Ultrasonix SDK on your system.
-SET(ULTRASONIX_SDK_PATH "C:/src/sdk574")
+SET(ULTRASONIX_SDK_PATH "C:/src/sdk610")
 
 # The Ultrasonix SDK version number
-SET(Ulterius_sdk_VERSION_MAJOR "5")
-SET(Ulterius_sdk_VERSION_MINOR "7")
-SET(Ulterius_sdk_VERSION_PATCH "4")
+SET(Ulterius_sdk_VERSION_MAJOR "6")
+SET(Ulterius_sdk_VERSION_MINOR "1")
+SET(Ulterius_sdk_VERSION_PATCH "0")
 
 # Name of ulterius library. This might be ulterius.lib or ulterius_old.lib,
 # depending on your version of the Ultrasonix SDK.
 # ulterius.lib (5.7.4)
-# ulterius_old.lib (6.1.0)
-SET(ULTERIUS_LIB_NAME "ulterius.lib")
+# ulterius_old.lib (6.x)
+SET(ULTERIUS_LIB_NAME "ulterius_old.lib")
 ## end Ultrasonix SDK ##
 
 ## Boost configuration ## 
