@@ -115,7 +115,14 @@ void Ultracomm::disconnect()
         outindexfile.close();
         //printf("Last frame was %d.\n", lastFrame);
         double pct = 100.0 * framesReceived / (lastFrame+1);
-        printf("Acquired %d of %d frames (%0.4f percent).\n", framesReceived, lastFrame+1, pct);
+        if (framesReceived > 0 )
+        {
+            printf("Acquired %d of %d frames (%0.4f percent).\n", framesReceived, lastFrame+1, pct);
+        }
+        else
+        {
+            printf("No frames acquired.\n");
+        }
     if (ult.isConnected())
     {
         if (verbose) {
