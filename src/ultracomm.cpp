@@ -56,7 +56,7 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt)
     std::string outname = myuopt.opt["output"].as<string>();
     outfile.open(outname, ios::out | ios::binary),
     mystream = &outfile;
-    std::string outindexname = outname + ".idx";
+    std::string outindexname = outname + ".idx.txt";
     outindexfile.open(outindexname, ios::out | ios::binary);
     myindexstream = &outindexfile;
     if (acqmode == "continuous") {
@@ -116,6 +116,7 @@ void Ultracomm::disconnect()
     if (acqmode == "continuous") {
         write_numframes_in_header(outfile, framesReceived);
         outfile.close();
+        outindexfile.close();
         //printf("Last frame was %d.\n", lastFrame);
         double pct = 100.0 * framesReceived / (lastFrame+1);
         printf("Acquired %d of %d frames (%0.4f percent).\n", framesReceived, lastFrame+1, pct);
@@ -406,7 +407,6 @@ bool Ultracomm::frame_callback(void* data, int type, int sz, bool cine, int frmn
     std::string frmint = std::to_string(long double(frmnum)) + "\n";
     myindexstream->write(frmint.c_str(), frmint.size());
     mystream->write((const char*)data, sz);
-    myindexstream->write(frmint.c_str(), frmint.size());
 
     return true;
 }
