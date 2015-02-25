@@ -2,7 +2,9 @@
 
 #define BUFFERSIZE (2 * 1024 * 1024)
 char gBuffer[BUFFERSIZE];
-int lastFrame = -1;
+int maxFrameIndex = 16000;  // Highest frame index in callback.
+int frame_incr = 0;   // How much to increment frmnum in callback.
+int lastFrame = 0;
 int framesReceived = 0;
 
 /*
@@ -114,10 +116,11 @@ void Ultracomm::disconnect()
         outfile.close();
         outindexfile.close();
         //printf("Last frame was %d.\n", lastFrame);
-        double pct = 100.0 * framesReceived / (lastFrame+1);
+        int expected = lastFrame + frame_incr;
+        double pct = 100.0 * framesReceived / expected;
         if (framesReceived > 0 )
         {
-            printf("Acquired %d of %d frames (%0.4f percent).\n", framesReceived, lastFrame+1, pct);
+            printf("Acquired %d of %d frames (%0.4f percent).\n", framesReceived, expected, pct);
         }
         else
         {
@@ -425,6 +428,10 @@ bool Ultracomm::frame_callback(void* data, int type, int sz, bool cine, int frmn
 
     //printf("[Rx] type:(%d) size:(%d) cine:(%d) gBuffer:(%d) frame:(%d)\n", type, sz, cine, &gBuffer, frmnum);
 //    printf("%d\n", frmnum);
+    // Check to see whether the frmnum index has wrapped past its maximum value.
+    if (frmnum < lastFrame) {
+        frame_incr += maxFrameIndex + 1;
+    }
 /*
     if (frmnum != lastFrame + 1) {
         printf("Skipped frame(s) %d - %d.\n", lastFrame + 1, frmnum - 1);
@@ -434,7 +441,7 @@ bool Ultracomm::frame_callback(void* data, int type, int sz, bool cine, int frmn
     framesReceived++;
     // make sure we dont do an operation that takes longer than the acquisition frame rate
     //memcpy(gBuffer, data, sz);
-    std::string frmint = std::to_string(long double(frmnum)) + "\n";
+    std::string frmint = std::to_string(long double(frmnum+frame_incr)) + "\n";
     myindexstream->write(frmint.c_str(), frmint.size());
     mystream->write((const char*)data, sz);
 
