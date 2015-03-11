@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
 
         // We're done.
         if (uopt.opt.count("delay-exit")) {
-            cout << "*** Acquisition finished. Press <Enter> to exit program. ***\n";
+            cout << "*** ultracomm finished. Press <Enter> to exit program. ***\n";
             cin.ignore();  // Wait until <Enter>.
         }
         uc.disconnect();
@@ -42,6 +42,10 @@ int main(int argc, char* argv[])
     }
     catch(const UltracommOptions::WantsToStop& e) {   // --help or --version
         e.what();   // Doesn't do much besides avoid unused variable warning.
+        if (uopt.opt.count("delay-exit")) {
+            cout << "*** ultracomm finished. Press <Enter> to exit program. ***\n";
+            cin.ignore();  // Wait until <Enter>.
+        }
         exit_status = EXIT_SUCCESS;
     }
     catch(const po::required_option& e) {
