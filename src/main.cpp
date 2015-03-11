@@ -33,6 +33,10 @@ int main(int argc, char* argv[])
         }
 
         // We're done.
+        if (uopt.opt.count("delay-exit")) {
+            cout << "*** Acquisition finished. Press <Enter> to exit program. ***\n";
+            cin.ignore();  // Wait until <Enter>.
+        }
         uc.disconnect();
         exit_status = EXIT_SUCCESS;
     }

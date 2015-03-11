@@ -31,6 +31,7 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
         ("verbose,v", po::value<int>()->default_value(0), "display informational messages")
         ("ms_delay_after_freeze", po::value<int>()->default_value(0), "force ultrasonix to wait to acquire cine data after freezing (ms)")
         ("compression_status", po::value<int>()->default_value(0), "compression status")
+        ("delay-exit", "wait for user input before exiting")
     ;
 
     // Options allowed in options file or on command line.
