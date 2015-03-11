@@ -73,15 +73,33 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
     // This precedes po::notify() in case of error in parameters.
     if (opt.count("help")) {
         cout << cmdline_options << "\n";
-        throw WantsToStop();
+        if (opt.count("delay-exit")) {
+            throw WantsToStopWithDelay();
+        }
+        else
+        {
+            throw WantsToStop();
+        }
     }
     if (opt.count("version")) {
         cout << ULTRACOMM_VERSION;
-        throw WantsToStop();
+        if (opt.count("delay-exit")) {
+            throw WantsToStopWithDelay();
+        }
+        else
+        {
+            throw WantsToStop();
+        }
     }
     if (opt.count("sdkversion")) {
         cout << ULTERIUS_SDK_VERSION;
-        throw WantsToStop();
+        if (opt.count("delay-exit")) {
+            throw WantsToStopWithDelay();
+        }
+        else
+        {
+            throw WantsToStop();
+        }
     }
 
     // Add values from options file, if specified in command line.

@@ -20,6 +20,16 @@ public:
         }
     };
     
+    // Throw this one if program should stop when an option is encountered,
+    // e.g. --help, and then delay exit until user input.
+    struct WantsToStopWithDelay : public exception
+    {
+      const char * what () const throw ()
+        {
+          return "";
+        }
+    };
+    
     struct MissingOptionsFileError : public exception
     {
       const char * what () const throw ()

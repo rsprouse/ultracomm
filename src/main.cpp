@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#include <conio.h>
 
 /*
     ultracomm -- main
@@ -22,8 +23,8 @@ int main(int argc, char* argv[])
         else if (! uopt.opt.count("freeze-only")) {
             // Start acquisition, wait for user interaction, then stop.
             uc.wait_for_unfreeze();
-            cout << "*** Acquiring images. Press <Enter> to stop. ***\n";
-            cin.ignore();  // Wait until <Enter>.
+            cout << "*** Acquiring images. Press any key to stop. ***\n";
+            _getch();  // Wait for user input.
             uc.wait_for_freeze();
             
             if (uopt.opt["acqmode"].as<string>() == "buffered") {
@@ -34,18 +35,20 @@ int main(int argc, char* argv[])
 
         // We're done.
         if (uopt.opt.count("delay-exit")) {
-            cout << "*** ultracomm finished. Press <Enter> to exit program. ***\n";
-            cin.ignore();  // Wait until <Enter>.
+            cout << "*** ultracomm finished. Press any key to exit the program. ***\n";
+            _getch();  // Wait for user input.
         }
         uc.disconnect();
         exit_status = EXIT_SUCCESS;
     }
     catch(const UltracommOptions::WantsToStop& e) {   // --help or --version
         e.what();   // Doesn't do much besides avoid unused variable warning.
-        if (uopt.opt.count("delay-exit")) {
-            cout << "*** ultracomm finished. Press <Enter> to exit program. ***\n";
-            cin.ignore();  // Wait until <Enter>.
-        }
+        exit_status = EXIT_SUCCESS;
+    }
+    catch(const UltracommOptions::WantsToStopWithDelay& e) {
+        e.what();   // Doesn't do much besides avoid unused variable warning.
+        cout << "*** ultracomm finished. Press any key to exit the program. ***\n";
+        _getch();  // Wait for user input.
         exit_status = EXIT_SUCCESS;
     }
     catch(const po::required_option& e) {
