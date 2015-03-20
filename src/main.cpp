@@ -1,6 +1,9 @@
 #include "StdAfx.h"
 #include <conio.h>
 
+// Port for listening socket.
+#define DEFAULT_PORT 50047
+
 /*
     ultracomm -- main
 */
@@ -20,11 +23,37 @@ int main(int argc, char* argv[])
         if (uopt.opt.count("dump-params")) {
             uc.dump_params();
         }
+        // Start acquisition, wait for interaction, then stop.
         else if (! uopt.opt.count("freeze-only")) {
-            // Start acquisition, wait for user interaction, then stop.
             uc.wait_for_unfreeze();
-            cout << "*** Acquiring images. Press any key to stop. ***\n";
-            _getch();  // Wait for user input.
+            if (! uopt.opt.count("socket")) {
+                cout << "*** Acquiring images. Press any key to stop. ***\n";
+                _getch();  // Wait for user input.
+            }
+            // Block until an outside process connects to and disconnects from
+            // Listener.
+            else {
+                try {
+                    Listener listener = Listener::Listener(DEFAULT_PORT);
+                    listener.listen();
+                    listener.block();
+                    listener.shutdown();
+                }
+                catch(const Listener::SocketBlockError& e) {
+                    cerr << "Error while blocking on socket: ";
+                    cerr << e.what() << "\n";
+                    exit_status = SOCKET_BLOCK_ERROR;
+                }
+                catch(const exception& e) {
+                    cerr << "Error in creating socket or accepting connection: ";
+                    cerr << e.what() << "\n";
+                    exit_status = SOCKET_ERROR;
+                }
+                catch(...) {
+                    cerr << "Unhandled exception of unknown type!\n";
+                    exit_status = UNKNOWN_ERROR;
+                }
+            }
             uc.wait_for_freeze();
             
             if (uopt.opt["acqmode"].as<string>() == "buffered") {
