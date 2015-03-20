@@ -3,7 +3,7 @@
 // Successful program exit.
 #define EXIT_SUCCESS 0
 
-//  One or more required command line parameters are missing.
+// One or more required command line parameters are missing.
 #define MISSING_REQUIRED_OPTION_ERROR 1
 
 // An options file was identified on the command line but can't be accessed.
@@ -14,6 +14,12 @@
 
 // Could not connect to the Ultrasonix server.
 #define CONNECTION_ERROR 100
+
+// Error in creating socket or accepting connection.
+#define SOCKET_ERROR 200
+
+// Error while socket is blocking.
+#define SOCKET_BLOCK_ERROR 210
 
 // Unknown.
 #define UNKNOWN_ERROR 1000
