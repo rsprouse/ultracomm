@@ -1,6 +1,7 @@
 #pragma once
 
 #include <windows.h>
+#include <winsock.h>
 #include <conio.h>
 
 #include <vector>
@@ -18,6 +19,7 @@
 
 #include "ultracomm.h"
 #include "options.h"
+#include "listener.h"
 #include "exit_codes.h"
 
 namespace po = boost::program_options;

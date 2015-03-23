@@ -1,7 +1,5 @@
 #pragma once
 
-#include <winsock.h>
-
 /*
     The purpose of the Listener class is to open a socket and accept a
     connection from another local process. Use block() in the current
