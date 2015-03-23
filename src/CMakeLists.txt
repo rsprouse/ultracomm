@@ -2,6 +2,8 @@ INIT(ultracomm)
 
 ADD_PCH_SUPPORT()
 #LIST(APPEND LIBS ${CMAKE_CURRENT_SOURCE_DIR}/../../lib/ulterius_old.lib)
+# ws2_32.lib is needed for winsock
+LIST(APPEND LIBS "ws2_32.lib")
 LIST(APPEND LIBS ${ULTRASONIX_SDK_PATH}/ulterius/lib/${ULTERIUS_LIB_NAME})
 ADD_DEFINITIONS(-DIMPORT_ULTERIUS)
 

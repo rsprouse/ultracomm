@@ -1,8 +1,6 @@
 #pragma once
 namespace po = boost::program_options;
 
-using namespace std;
-
 class UltracommOptions
 {
 
@@ -12,7 +10,7 @@ public:
 
     // Throw this one if program should stop when an option is encountered,
     // e.g. --help.
-    struct WantsToStop : public exception
+    struct WantsToStop : public std::exception
     {
       const char * what () const throw ()
         {
@@ -22,7 +20,7 @@ public:
     
     // Throw this one if program should stop when an option is encountered,
     // e.g. --help, and then delay exit until user input.
-    struct WantsToStopWithDelay : public exception
+    struct WantsToStopWithDelay : public std::exception
     {
       const char * what () const throw ()
         {
@@ -30,7 +28,7 @@ public:
         }
     };
     
-    struct MissingOptionsFileError : public exception
+    struct MissingOptionsFileError : public std::exception
     {
       const char * what () const throw ()
         {
@@ -38,7 +36,7 @@ public:
         }
     };
     
-    struct UnimplementedFeatureError : public exception
+    struct UnimplementedFeatureError : public std::exception
     {
       const char * what () const throw ()
         {
@@ -46,7 +44,7 @@ public:
         }
     };
 
-    struct MissingRequiredOptionError : public exception
+    struct MissingRequiredOptionError : public std::exception
     {
       const char * what () const throw ()
         {

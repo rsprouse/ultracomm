@@ -3,10 +3,13 @@
 #define DEFAULT_BUFLEN 512
 
 // See https://msdn.microsoft.com/en-us/library/windows/desktop/bb530742(v=vs.85).aspx
-Listener::Listener(const int port)
+Listener::Listener(const char *port)
     : port(port)
 {
-    struct addrinfo *result = NULL, *ptr = NULL, hints;
+    struct addrinfo *result = NULL;
+    struct addrinfo hints;
+    int iResult;
+
     char *hostname = "localhost";
 
     ZeroMemory(&hints, sizeof (hints));
@@ -49,7 +52,7 @@ Listener::Listener(const int port)
 /*
     Listen for and accept a client connection.
 */
-void Listener::listen()
+void Listener::do_listen()
 {
     // Allow connection from a single outside process only.
     const int max_connections = 1;
@@ -74,11 +77,11 @@ void Listener::listen()
 /*
     Block until client gracefully closes the connection.
 */
-void Listener::block()
+void Listener::do_block()
 {
     
     char recvbuf[DEFAULT_BUFLEN];
-    int iResult, iSendResult;
+    int iResult;
     int recvbuflen = DEFAULT_BUFLEN;
     
     // Receive until the peer shuts down the connection
@@ -118,9 +121,10 @@ void Listener::block()
 /*
     Disconnect and shut down the server.
 */
-void Listener::shutdown()
+void Listener::do_shutdown()
 {
     // Shut down the send half of the connection since no more data will be sent.
+    int iResult;
     iResult = shutdown(client_socket, SD_SEND);
     if (iResult == SOCKET_ERROR) {
         printf("shutdown failed: %d\n", WSAGetLastError());

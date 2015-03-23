@@ -7,7 +7,7 @@
 UltracommOptions::UltracommOptions(const int& argc, char* argv[])
     : int_imaging_params("Ultracomm integer parameters")
 {
-    //string appName = boost::filesystem::basename(argv[0]);
+    //std::string appName = boost::filesystem::basename(argv[0]);
 
     // Command-line-only options.
     po::options_description cmdlineonly("Ultracomm command-line-only options");
@@ -17,15 +17,15 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
         ("freeze-only", "send freeze command to ultrasonix and stop")
         ("dump-params", "print current ultrasonix parameter values and stop")
         ("sdkversion", "print Ultrasonix SDK version used to compile ultracomm and stop")
-        ("params,p", po::value<string>(), "parameter options file (see below)")
+        ("params,p", po::value<std::string>(), "parameter options file (see below)")
     ;
 
     // Options allowed in options file or on command line.
     po::options_description global_opts("Ultracomm global options for command line or options file");
     global_opts.add_options()
-        ("address,a", po::value<string>()->required(), "ultrasonix ip address")
-        ("output,o", po::value<string>()->default_value(""), "output filename")
-        ("acqmode", po::value<string>()->default_value("continuous"), "acquisition mode")
+        ("address,a", po::value<std::string>()->required(), "ultrasonix ip address")
+        ("output,o", po::value<std::string>()->default_value(""), "output filename")
+        ("acqmode", po::value<std::string>()->default_value("continuous"), "acquisition mode")
         ("datatype", po::value<int>()->default_value(2), "datatype")
         ("probe-id", po::value<int>(), "probe-id")
         ("verbose,v", po::value<int>()->default_value(0), "display informational messages")
@@ -73,7 +73,7 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
 
     // This precedes po::notify() in case of error in parameters.
     if (opt.count("help")) {
-        cout << cmdline_options << "\n";
+        std::cout << cmdline_options << "\n";
         if (opt.count("delay-exit")) {
             throw WantsToStopWithDelay();
         }
@@ -83,7 +83,7 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
         }
     }
     if (opt.count("version")) {
-        cout << ULTRACOMM_VERSION;
+        std::cout << ULTRACOMM_VERSION;
         if (opt.count("delay-exit")) {
             throw WantsToStopWithDelay();
         }
@@ -93,7 +93,7 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
         }
     }
     if (opt.count("sdkversion")) {
-        cout << ULTERIUS_SDK_VERSION;
+        std::cout << ULTERIUS_SDK_VERSION;
         if (opt.count("delay-exit")) {
             throw WantsToStopWithDelay();
         }
@@ -106,11 +106,11 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
     // Add values from options file, if specified in command line.
     if (opt.count("params")) {
         if (opt["verbose"].as<int>() > 0) {
-            cerr << "verbosity is " << opt["verbose"].as<int>() << ".\n";
-            cerr << "Using params file " << opt["params"].as<string>() << ".\n";
+            std::cerr << "verbosity is " << opt["verbose"].as<int>() << ".\n";
+            std::cerr << "Using params file " << opt["params"].as<std::string>() << ".\n";
         }
 
-        ifstream ifs(opt["params"].as<string>().c_str());
+        std::ifstream ifs(opt["params"].as<std::string>().c_str());
         if (!ifs)
         {
             throw MissingOptionsFileError();
@@ -127,19 +127,19 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
     // Check that we are working within the limitations of the current 
     // program implementation.
     if (! (opt.count("freeze-only") || opt.count("dump-params"))) {
-        if (opt["output"].as<string>() == "") {
-            cerr << "No output file specified. Quitting.\n";
+        if (opt["output"].as<std::string>() == "") {
+            std::cerr << "No output file specified. Quitting.\n";
             throw MissingRequiredOptionError();
         }
-        const string ext = ".bpr";
-        if (! boost::algorithm::ends_with(opt["output"].as<string>(), ext))
+        const std::string ext = ".bpr";
+        if (! boost::algorithm::ends_with(opt["output"].as<std::string>(), ext))
         {
-            cerr << "Only .bpr output is supported.\n";
+            std::cerr << "Only .bpr output is supported.\n";
             throw UnimplementedFeatureError();
         }
         if (opt["datatype"].as<int>() != 2)
         {
-            cerr << "Only datatype 2 is supported.\n";
+            std::cerr << "Only datatype 2 is supported.\n";
             throw UnimplementedFeatureError();
         }
     }

@@ -9,13 +9,13 @@
 
 class Listener
 {
-    const int port;           // socket port
+    const char *port;           // socket port
     SOCKET listen_socket;     // socket listener
     SOCKET client_socket;     // client socket
 
 public:
 
-    struct SocketAddrinfoError : public exception
+    struct SocketAddrinfoError : public std::exception
     {
       const char * what () const throw ()
         {
@@ -23,7 +23,7 @@ public:
         }
     };
   
-    struct SocketInvalidError : public exception
+    struct SocketInvalidError : public std::exception
     {
       const char * what () const throw ()
         {
@@ -31,7 +31,7 @@ public:
         }
     };
   
-    struct SocketBindError : public exception
+    struct SocketBindError : public std::exception
     {
       const char * what () const throw ()
         {
@@ -39,7 +39,7 @@ public:
         }
     };
   
-    struct SocketListenError : public exception
+    struct SocketListenError : public std::exception
     {
       const char * what () const throw ()
         {
@@ -47,7 +47,7 @@ public:
         }
     };
   
-    struct SocketAcceptError : public exception
+    struct SocketAcceptError : public std::exception
     {
       const char * what () const throw ()
         {
@@ -55,7 +55,7 @@ public:
         }
     };
   
-    struct SocketBlockError : public exception
+    struct SocketBlockError : public std::exception
     {
       const char * what () const throw ()
         {
@@ -63,7 +63,7 @@ public:
         }
     };
   
-    struct SocketSendError : public exception
+    struct SocketSendError : public std::exception
     {
       const char * what () const throw ()
         {
@@ -71,7 +71,7 @@ public:
         }
     };
   
-    struct SocketReceiveError : public exception
+    struct SocketReceiveError : public std::exception
     {
       const char * what () const throw ()
         {
@@ -79,7 +79,7 @@ public:
         }
     };
   
-    struct SocketShutdownError : public exception
+    struct SocketShutdownError : public std::exception
     {
       const char * what () const throw ()
         {
@@ -87,8 +87,8 @@ public:
         }
     };
   
-    Listener(const int port);
-    void listen();
-    void block();
-    void shutdown();
+    Listener(const char *port);
+    void do_listen();
+    void do_block();
+    void do_shutdown();
 };

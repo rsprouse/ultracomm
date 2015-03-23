@@ -11,9 +11,9 @@ int framesReceived = 0;
    The Ultracomm object is not available in the callback, so we copy some of
    its attributes into file-local variables that the callback can access.
 */
-ofstream* mystream;
+std::ofstream* mystream;
 int myframesize;
-ofstream* myindexstream;
+std::ofstream* myindexstream;
 
 /*
     Construct Ultracomm object, connect to server,
@@ -21,25 +21,25 @@ ofstream* myindexstream;
 */
 Ultracomm::Ultracomm(const UltracommOptions& myuopt)
     : uopt(myuopt),
-      address(myuopt.opt["address"].as<string>()),
-      acqmode(myuopt.opt["acqmode"].as<string>()),
+      address(myuopt.opt["address"].as<std::string>()),
+      acqmode(myuopt.opt["acqmode"].as<std::string>()),
       datatype(myuopt.opt["datatype"].as<int>()),
       verbose(myuopt.opt["verbose"].as<int>())
 {
     connect();
     if (verbose) {
-        cerr << "Setting data to acquire to datatype " << datatype << ".\n";
+        std::cerr << "Setting data to acquire to datatype " << datatype << ".\n";
     }
     ult.setDataToAcquire(datatype);
     set_int_imaging_params();
     check_int_imaging_params();
     const int compstat = uopt.opt["compression_status"].as<int>();
     if (verbose) {
-        cerr << "Setting compression status to " << compstat << ".\n";
+        std::cerr << "Setting compression status to " << compstat << ".\n";
     }
 
     if (! ult.setCompressionStatus(compstat)) {
-        cerr << "Failed to set compression status to " << compstat << ".\n";
+        std::cerr << "Failed to set compression status to " << compstat << ".\n";
         throw ParameterMismatchError();
     }
     if (! ult.getDataDescriptor((uData)datatype, desc))
@@ -53,11 +53,11 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt)
     // TODO: framesize assumes desc.ss is always a multiple of 8, and that might not be safe.
     framesize = (desc.ss / 8) * desc.w * desc.h;
     myframesize = framesize;
-    std::string outname = myuopt.opt["output"].as<string>();
-    outfile.open(outname, ios::out | ios::binary),
+    std::string outname = myuopt.opt["output"].as<std::string>();
+    outfile.open(outname, std::ios::out | std::ios::binary),
     mystream = &outfile;
     std::string outindexname = outname + ".idx.txt";
-    outindexfile.open(outindexname, ios::out | ios::binary);
+    outindexfile.open(outindexname, std::ios::out | std::ios::binary);
     myindexstream = &outindexfile;
     if (acqmode == "continuous") {
         ult.setCallback(frame_callback);
@@ -71,7 +71,7 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt)
 void Ultracomm::connect()
 {
     if (verbose) {
-        cerr << "Connecting to ultrasonix at address " << address << ".\n";
+        std::cerr << "Connecting to ultrasonix at address " << address << ".\n";
     }
     if (!ult.connect(address.c_str()))
     {
@@ -83,11 +83,11 @@ void Ultracomm::connect()
     //}
 /*
     int imgmode = ult.getActiveImagingMode();
-    cout << "Imaging mode is " << imgmode << ".\n";
+    std::cout << "Imaging mode is " << imgmode << ".\n";
     bool im = ult.getInjectMode();
-    cout << "Inject mode is " << im << ".\n";
+    std::cout << "Inject mode is " << im << ".\n";
     bool ss = ult.getStreamStatus();
-    cout << "Stream status is " << ss << ".\n";
+    std::cout << "Stream status is " << ss << ".\n";
 */
 /*
 TODO: throw different errors depending on problem. Note that FD_CONNECT error
@@ -129,14 +129,14 @@ void Ultracomm::disconnect()
     if (ult.isConnected())
     {
         if (verbose) {
-            cerr << "Disconnecting from Ultrasonix.\n";
+            std::cerr << "Disconnecting from Ultrasonix.\n";
         }
         ult.disconnect();
     }
     else
     {
         if (verbose) {
-            cerr << "Already disconnected from Ultrasonix.\n";
+            std::cerr << "Already disconnected from Ultrasonix.\n";
         }
     }
 }
@@ -150,14 +150,14 @@ void Ultracomm::wait_for_freeze()
     if (ult.getFreezeState() != 1)
     {
         if (verbose) {
-            cerr << "Freezing Ultrasonix.\n";
+            std::cerr << "Freezing Ultrasonix.\n";
         }
         ult.toggleFreeze();
     }
     else
     {
         if (verbose) {
-            cerr << "Ultrasonix already frozen.\n";
+            std::cerr << "Ultrasonix already frozen.\n";
         }
     }
     // Wait for server to acknowledge it has frozen.
@@ -165,7 +165,7 @@ void Ultracomm::wait_for_freeze()
     while (ult.getFreezeState() != 1)
     {
         if (verbose) {
-            cerr << "Waiting for confirmation that Ultrasonix has frozen.\n";
+            std::cerr << "Waiting for confirmation that Ultrasonix has frozen.\n";
         }
     }
     /*
@@ -201,14 +201,14 @@ void Ultracomm::wait_for_unfreeze()
     if (ult.getFreezeState() != 0)
     {
         if (verbose) {
-            cerr << "Unfreezing Ultrasonix.\n";
+            std::cerr << "Unfreezing Ultrasonix.\n";
         }
         ult.toggleFreeze();
     }
     else
     {
         if (verbose) {
-            cerr << "Ultrasonix already imaging.\n";
+            std::cerr << "Ultrasonix already imaging.\n";
         }
     }
     // Wait for server to acknowledge it has switched to imaging.
@@ -216,7 +216,7 @@ void Ultracomm::wait_for_unfreeze()
     while (ult.getFreezeState() != 0)
     {
         if (verbose) {
-            cerr << "Waiting for confirmation that Ultrasonix is imaging.\n";
+            std::cerr << "Waiting for confirmation that Ultrasonix is imaging.\n";
         }
     }
 }
@@ -229,7 +229,7 @@ void Ultracomm::dump_params()
     int i = 0;
     int val;
     uParam param;
-    cout << "index\tparam.id\tvalue\tparam.name\tparam.source\tparam.type\n";
+    std::cout << "index\tparam.id\tvalue\tparam.name\tparam.source\tparam.type\n";
     while (ult.getParam(i++, param))
     {
         // TODO: Learn about different param types and how to get their values.
@@ -237,11 +237,11 @@ void Ultracomm::dump_params()
         // Have not been able to get getParamValue() to return false either.
         if (ult.getParamValue(param.id, val))
         {
-            cout << i << "\t" << param.id << "\t" << val << "\t" << param.name << "\t" << param.source << "\t" << param.type << "\t" << param.unit << "\n";
+            std::cout << i << "\t" << param.id << "\t" << val << "\t" << param.name << "\t" << param.source << "\t" << param.type << "\t" << param.unit << "\n";
         }
         else
         {
-            cerr << i << "\t'" << param.id << "'\t" << param.name << "\tFAILED\n";
+            std::cerr << i << "\t'" << param.id << "'\t" << param.name << "\tFAILED\n";
         }
     }
 }
@@ -267,12 +267,12 @@ void Ultracomm::set_int_imaging_params()
            optname: the name as used in ultracomm program options (underscores)
            ultname: the name as used by ulterius setParamValue() (spaces)
         */
-        string optname = (*iter)->long_name();
-        string ultname = boost::replace_all_copy(optname, "_", " ");
+        std::string optname = (*iter)->long_name();
+        std::string ultname = boost::replace_all_copy(optname, "_", " ");
         if (params.count(optname)) {
             int val = params[optname].as<int>();
             if (verbose) {
-                cerr << "Setting '" << ultname << "' to value " << val << ".\n";
+                std::cerr << "Setting '" << ultname << "' to value " << val << ".\n";
             }
             ult.setParamValue(ultname.c_str(), val);
         }
@@ -293,17 +293,17 @@ void Ultracomm::check_int_imaging_params()
            See comments in set_int_imaging_params() for mangling of
            parameter names.
         */
-        string optname = (*iter)->long_name();
-        string ultname = boost::replace_all_copy(optname, "_", " ");
+        std::string optname = (*iter)->long_name();
+        std::string ultname = boost::replace_all_copy(optname, "_", " ");
         if (params.count(optname)) {
             int expected, got;
             expected = params[optname].as<int>();
             ult.getParamValue(ultname.c_str(), got);
             if (verbose) {
-                cerr << "Got value of '" << ultname << "'. Expected " << expected << " and got " << got << ".\n";
+                std::cerr << "Got value of '" << ultname << "'. Expected " << expected << " and got " << got << ".\n";
             }
             if (got != expected) {
-                cerr << "Parameter '" << ultname << "' expected " << expected << " and got " << got << ".\n";
+                std::cerr << "Parameter '" << ultname << "' expected " << expected << " and got " << got << ".\n";
                 throw ParameterMismatchError();
             }
         }
@@ -326,12 +326,12 @@ void Ultracomm::save_data()
     for (int idx = 0; idx < num_frames; idx++)
     {
         if (verbose) {
-            cerr << "Getting cine data for frame " << idx << ".\n";
+            std::cerr << "Getting cine data for frame " << idx << ".\n";
         }
         ult.getCineData((uData)datatype, idx, false, (char**)&gBuffer, BUFFERSIZE);
         outfile.write(gBuffer, framesize);
         if (verbose) {
-            cerr << "Wrote cine data for frame " << idx << ".\n";
+            std::cerr << "Wrote cine data for frame " << idx << ".\n";
         }
     }
     outfile.close();
@@ -341,10 +341,10 @@ void Ultracomm::save_data()
     TODO: header information is probably correct for .bpr files but possibly
     not for other datatypes.
 */
-void Ultracomm::write_header(ofstream& outfile, const uDataDesc& desc, const int& num_frames)
+void Ultracomm::write_header(std::ofstream& outfile, const uDataDesc& desc, const int& num_frames)
 {
     if (verbose) {
-        cerr << "Writing header.\n";
+        std::cerr << "Writing header.\n";
     }
     // Integer fields that we can write directly. Luckily these all are
     // consecutive fields in the header.
@@ -372,7 +372,7 @@ void Ultracomm::write_header(ofstream& outfile, const uDataDesc& desc, const int
     // Integer fields that we have to query from Ultrasonix. These are also
     // consecutive in the header.
     // FIXME: Determine if these are the correct params to put in the header.
-    static const string queries[] = {
+    static const std::string queries[] = {
         "b-freq",
         "vec-freq",
         "frame rate",
@@ -393,7 +393,7 @@ void Ultracomm::write_header(ofstream& outfile, const uDataDesc& desc, const int
 /*
     TODO: kind of a hack.
 */
-void Ultracomm::write_numframes_in_header(ofstream& outfile, const int& num_frames)
+void Ultracomm::write_numframes_in_header(std::ofstream& outfile, const int& num_frames)
 {
     const int isize = sizeof(__int32);
     outfile.seekp(isize);
@@ -408,7 +408,7 @@ bool Ultracomm::frame_callback(void* data, int type, int sz, bool cine, int frmn
 {
 /*
     if (verbose) {
-        cerr << "In callback.\n";
+        std::cerr << "In callback.\n";
     }
 
     if (!data || !sz)

@@ -1,7 +1,8 @@
 #pragma once
 
-#include <windows.h>
-#include <winsock.h>
+#include <winsock2.h>
+//#include <windows.h>
+#include <ws2tcpip.h>
 #include <conio.h>
 
 #include <vector>
@@ -23,6 +24,5 @@
 #include "exit_codes.h"
 
 namespace po = boost::program_options;
-using namespace std;
 
 

@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 
 // Port for listening socket.
-#define DEFAULT_PORT 50047
+#define DEFAULT_PORT "50047"
 
 /*
     ultracomm -- main
@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
         else if (! uopt.opt.count("freeze-only")) {
             uc.wait_for_unfreeze();
             if (! uopt.opt.count("socket")) {
-                cout << "*** Acquiring images. Press any key to stop. ***\n";
+                std::cout << "*** Acquiring images. Press any key to stop. ***\n";
                 _getch();  // Wait for user input.
             }
             // Block until an outside process connects to and disconnects from
@@ -34,28 +34,28 @@ int main(int argc, char* argv[])
             else {
                 try {
                     Listener listener = Listener::Listener(DEFAULT_PORT);
-                    listener.listen();
-                    listener.block();
-                    listener.shutdown();
+                    listener.do_listen();
+                    listener.do_block();
+                    listener.do_shutdown();
                 }
                 catch(const Listener::SocketBlockError& e) {
-                    cerr << "Error while blocking on socket: ";
-                    cerr << e.what() << "\n";
+                    std::cerr << "Error while blocking on socket: ";
+                    std::cerr << e.what() << "\n";
                     exit_status = SOCKET_BLOCK_ERROR;
                 }
-                catch(const exception& e) {
-                    cerr << "Error in creating socket or accepting connection: ";
-                    cerr << e.what() << "\n";
+                catch(const std::exception& e) {
+                    std::cerr << "Error in creating socket or accepting connection: ";
+                    std::cerr << e.what() << "\n";
                     exit_status = SOCKET_INIT_ERROR;
                 }
                 catch(...) {
-                    cerr << "Unhandled exception of unknown type!\n";
+                    std::cerr << "Unhandled exception of unknown type!\n";
                     exit_status = UNKNOWN_ERROR;
                 }
             }
             uc.wait_for_freeze();
             
-            if (uopt.opt["acqmode"].as<string>() == "buffered") {
+            if (uopt.opt["acqmode"].as<std::string>() == "buffered") {
                 // Get data from Ultrasonix and save to file.
                 uc.save_data();
             }
@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
 
         // We're done.
         if (uopt.opt.count("delay-exit")) {
-            cout << "*** ultracomm finished. Press any key to exit the program. ***\n";
+            std::cout << "*** ultracomm finished. Press any key to exit the program. ***\n";
             _getch();  // Wait for user input.
         }
         uc.disconnect();
@@ -75,32 +75,32 @@ int main(int argc, char* argv[])
     }
     catch(const UltracommOptions::WantsToStopWithDelay& e) {
         e.what();   // Doesn't do much besides avoid unused variable warning.
-        cout << "*** ultracomm finished. Press any key to exit the program. ***\n";
+        std::cout << "*** ultracomm finished. Press any key to exit the program. ***\n";
         _getch();  // Wait for user input.
         exit_status = EXIT_SUCCESS;
     }
     catch(const po::required_option& e) {
-        cerr << "Missing required option: " << e.what() << "\n";
+        std::cerr << "Missing required option: " << e.what() << "\n";
         exit_status = MISSING_REQUIRED_OPTION_ERROR;
     }
     catch(const UltracommOptions::MissingOptionsFileError& e) {
-        cerr << e.what() << "\n";
+        std::cerr << e.what() << "\n";
         exit_status = MISSING_OPTIONS_FILE_ERROR;
     }
     catch(const UltracommOptions::UnimplementedFeatureError& e) {
-        cerr << e.what() << "\n";
+        std::cerr << e.what() << "\n";
         exit_status = UNIMPLEMENTED_FEATURE_ERROR;
     }
     catch(const Ultracomm::ConnectionError& e) {
-        cerr << e.what() << "\n";
+        std::cerr << e.what() << "\n";
         exit_status = CONNECTION_ERROR;
     }
-    catch(const exception& e) {
-        cerr << "Exception: " << e.what() << "\n";
+    catch(const std::exception& e) {
+        std::cerr << "Exception: " << e.what() << "\n";
         exit_status = UNKNOWN_ERROR;
     }
     catch(...) {
-        cerr << "Unhandled exception of unknown type!\n";
+        std::cerr << "Unhandled exception of unknown type!\n";
         exit_status = UNKNOWN_ERROR;
     }
 
