@@ -1,5 +1,4 @@
 #include "StdAfx.h"
-#include <conio.h>
 
 // Port for listening socket.
 #define DEFAULT_PORT 50047
@@ -47,7 +46,7 @@ int main(int argc, char* argv[])
                 catch(const exception& e) {
                     cerr << "Error in creating socket or accepting connection: ";
                     cerr << e.what() << "\n";
-                    exit_status = SOCKET_ERROR;
+                    exit_status = SOCKET_INIT_ERROR;
                 }
                 catch(...) {
                     cerr << "Unhandled exception of unknown type!\n";

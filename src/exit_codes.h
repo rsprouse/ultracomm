@@ -16,7 +16,7 @@
 #define CONNECTION_ERROR 100
 
 // Error in creating socket or accepting connection.
-#define SOCKET_ERROR 200
+#define SOCKET_INIT_ERROR 200
 
 // Error while socket is blocking.
 #define SOCKET_BLOCK_ERROR 210
