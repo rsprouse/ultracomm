@@ -1,3 +1,5 @@
+#include "StdAfx.h"
+
 #define DEFAULT_BUFLEN 512
 
 // See https://msdn.microsoft.com/en-us/library/windows/desktop/bb530742(v=vs.85).aspx
