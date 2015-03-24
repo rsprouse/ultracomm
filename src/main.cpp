@@ -23,8 +23,15 @@ int main(int argc, char* argv[])
         else if (! uopt.opt.count("freeze-only")) {
             // Start acquisition, wait for user interaction, then stop.
             uc.wait_for_unfreeze();
-            cout << "*** Acquiring images. Press any key to stop. ***\n";
-            _getch();  // Wait for user input.
+            if (! uopt.opt.count("named-pipe")) {
+                cout << "*** Acquiring images. Press any key to stop. ***\n";
+                _getch();  // Wait for user input.
+            }
+            else {
+                cout << "*** Acquiring images. Waiting on named pipe. ***\n";
+                block_on_named_pipe();
+                cout << "*** Read data from named pipe. ***\n";
+            }
             uc.wait_for_freeze();
             
             if (uopt.opt["acqmode"].as<string>() == "buffered") {

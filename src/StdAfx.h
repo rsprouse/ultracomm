@@ -19,6 +19,7 @@
 #include "ultracomm.h"
 #include "options.h"
 #include "exit_codes.h"
+#include "pipe_server.h"
 
 namespace po = boost::program_options;
 using namespace std;
