@@ -81,7 +81,7 @@ void Listener::do_block()
 {
     
     char recvbuf[DEFAULT_BUFLEN];
-    int iResult;
+    int iResult, iSendResult;
     int recvbuflen = DEFAULT_BUFLEN;
     
     // Receive until the peer shuts down the connection
@@ -92,7 +92,6 @@ void Listener::do_block()
             // We would do something here if we were interested in the content of
             // received messages.
 
-/*
             printf("Bytes received: %d\n", iResult);
     
             // Echo the buffer back to the sender
@@ -104,7 +103,6 @@ void Listener::do_block()
                 throw SocketSendError();
             }
             printf("Bytes sent: %d\n", iSendResult);
-*/
         } else if (iResult == 0)
             printf("Connection closing...\n");
         else {
@@ -115,7 +113,6 @@ void Listener::do_block()
         }
     
     } while (iResult > 0);
-    
 }
 
 /*
@@ -136,5 +133,5 @@ void Listener::do_shutdown()
     // Clean up.
     closesocket(client_socket);
     closesocket(listen_socket);
-    WSACleanup();
+    //WSACleanup();
 }
