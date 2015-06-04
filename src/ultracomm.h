@@ -50,6 +50,13 @@ public:
           return "Parameter value does not match machine.";
         }
     };
+    struct OutputError : public exception
+    {
+      const char * what () const throw ()
+        {
+          return "Failed to open output file.";
+        }
+    };
 
 
     Ultracomm(const UltracommOptions& uopt);
