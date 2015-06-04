@@ -1,5 +1,4 @@
 #include "StdAfx.h"
-#include <conio.h>
 
 /*
     ultracomm -- main
@@ -9,36 +8,48 @@ int main(int argc, char* argv[])
 {
 
     int exit_status;
+    const bool blocking = true;  // block until ulterius commands have succeeded
     try {
         // Get command line and config file options.
         UltracommOptions uopt = UltracommOptions::UltracommOptions(argc, argv);
+        int verbose = uopt.opt["verbose"].as<int>();
         
         // Connect to Ultrasonix and set parameters.
         Ultracomm uc = Ultracomm::Ultracomm(uopt);
-        uc.wait_for_freeze();
+        uc.freeze(blocking);
         
         if (uopt.opt.count("dump-params")) {
             uc.dump_params();
         }
         else if (! uopt.opt.count("freeze-only")) {
             // Start acquisition, wait for user interaction, then stop.
-            uc.wait_for_unfreeze();
+//            uc.unset_data_to_acquire(blocking);
+            uc.set_data_to_acquire(blocking);
+            uc.freeze(blocking);
+            uc.unfreeze(blocking);
             if (! uopt.opt.count("named-pipe")) {
                 cout << "*** Acquiring images. Press any key to stop. ***\n";
                 _getch();  // Wait for user input.
             }
             else {
-                cout << "*** Acquiring images. Waiting on named pipe. ***\n";
+                if (verbose) {
+                    cout << "*** Acquiring images. Waiting on named pipe. ***\n";
+                }
                 block_on_named_pipe();
-                cout << "*** Read data from named pipe. ***\n";
+                if (verbose) {
+                    cout << "*** Read data from named pipe. ***\n";
+                }
             }
-            uc.wait_for_freeze();
-            
+            uc.freeze(blocking);
+            // When unset_data_to_acquire() is not used, we often get several frames
+            // of repeat data in our ulterius callback.
+            uc.unset_data_to_acquire(blocking);
             if (uopt.opt["acqmode"].as<string>() == "buffered") {
                 // Get data from Ultrasonix and save to file.
                 uc.save_data();
             }
         }
+        Sleep(200);  // allow time for callbacks to finish
 
         // We're done.
         if (uopt.opt.count("delay-exit")) {

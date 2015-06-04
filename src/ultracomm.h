@@ -62,8 +62,10 @@ public:
     Ultracomm(const UltracommOptions& uopt);
     void connect();
     void disconnect();
-    void wait_for_freeze();
-    void wait_for_unfreeze();
+    void set_data_to_acquire(const bool block);
+    void unset_data_to_acquire(const bool block);
+    void freeze(const bool block);
+    void unfreeze(const bool block);
     void dump_params();
     void set_int_imaging_params();
     void check_int_imaging_params();
