@@ -1,0 +1,7 @@
+Some notes on programming with Ulterius:
+
+isDataAvailable() does not tell you whether there are frames waiting to be sent by callback. It appears to tell you whether there are frames in the Cine buffer.
+
+Synchronization signal is started/ended by toggleFreeze(). Signals will be sent even if not data is being sent to the callback, i.e. setDataToAcquire(0) has been called.
+
+
