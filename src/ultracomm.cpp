@@ -6,6 +6,7 @@ int maxFrameIndex = 16000;  // Highest frame index in callback.
 int frame_incr = 0;   // How much to increment frmnum in callback.
 int lastFrame = 0;
 int framesReceived = 0;
+int callback_verbose = 0;
 
 /*
    The Ultracomm object is not available in the callback, so we copy some of
@@ -27,10 +28,11 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt)
       verbose(myuopt.opt["verbose"].as<int>())
 {
     connect();
+    callback_verbose = verbose;
     if (verbose) {
         cerr << "Setting data to acquire to datatype " << datatype << ".\n";
     }
-    ult.setDataToAcquire(datatype);
+//    ult.setDataToAcquire(datatype);
     set_int_imaging_params();
     check_int_imaging_params();
     const int compstat = uopt.opt["compression_status"].as<int>();
@@ -53,15 +55,28 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt)
     // TODO: framesize assumes desc.ss is always a multiple of 8, and that might not be safe.
     framesize = (desc.ss / 8) * desc.w * desc.h;
     myframesize = framesize;
-    std::string outname = myuopt.opt["output"].as<string>();
-    outfile.open(outname, ios::out | ios::binary),
-    mystream = &outfile;
-    std::string outindexname = outname + ".idx.txt";
-    outindexfile.open(outindexname, ios::out | ios::binary);
-    myindexstream = &outindexfile;
-    if (acqmode == "continuous") {
-        ult.setCallback(frame_callback);
-        write_header(outfile, desc, 0);
+
+
+    if (! uopt.opt.count("freeze-only"))
+    {
+        std::string outname = myuopt.opt["output"].as<string>();
+        outfile.open(outname, ios::out | ios::binary);
+        if (outfile.fail())
+        {
+            throw OutputError();
+        }
+        mystream = &outfile;
+        std::string outindexname = outname + ".idx.txt";
+        outindexfile.open(outindexname, ios::out | ios::binary);
+        if (outindexfile.fail())
+        {
+            throw OutputError();
+        }
+        myindexstream = &outindexfile;
+        if (acqmode == "continuous") {
+            ult.setCallback(frame_callback);
+            write_header(outfile, desc, 0);
+        }
     }
 }
 
@@ -112,11 +127,13 @@ ould not connect to Ultrasonix.
 */
 void Ultracomm::disconnect()
 {
+    if (! uopt.opt.count("freeze-only"))
+    {
         write_numframes_in_header(outfile, framesReceived);
         outfile.close();
         outindexfile.close();
         //printf("Last frame was %d.\n", lastFrame);
-        int expected = lastFrame + frame_incr;
+        int expected = lastFrame + frame_incr + 1;
         double pct = 100.0 * framesReceived / expected;
         if (framesReceived > 0 )
         {
@@ -126,6 +143,7 @@ void Ultracomm::disconnect()
         {
             printf("No frames acquired.\n");
         }
+    }
     if (ult.isConnected())
     {
         if (verbose) {
@@ -142,9 +160,43 @@ void Ultracomm::disconnect()
 }
 
 /*
+  Set data to acquire from Ultrasonix to configuration value.
+*/
+void Ultracomm::set_data_to_acquire(const bool block)
+{
+    ult.setDataToAcquire(datatype);
+    if (block)
+    {
+        while (ult.getDataToAcquire() != datatype)
+        {
+            //if (verbose) {
+                cerr << "Waiting for confirmation that data acquisition has been set.\n";
+           // }
+        }
+    }
+}
+
+/*
+  Set data to acquire from Ultrasonix to 0.
+*/
+void Ultracomm::unset_data_to_acquire(const bool block)
+{
+    ult.setDataToAcquire(0);
+    if (block)
+    {
+        while (ult.getDataToAcquire() != 0)
+        {
+            if (verbose) {
+                cerr << "Waiting for confirmation that data acquisition has been unset.\n";
+            }
+        }
+    }
+}
+
+/*
   Put Ultrasonix into freeze state and wait for confirmation.
 */
-void Ultracomm::wait_for_freeze()
+void Ultracomm::freeze(const bool block)
 {
     // 1 = FROZEN; 0 = IMAGING
     if (ult.getFreezeState() != 1)
@@ -162,10 +214,13 @@ void Ultracomm::wait_for_freeze()
     }
     // Wait for server to acknowledge it has frozen.
     // TODO: this would be safer with a timeout.
-    while (ult.getFreezeState() != 1)
+    if (block)
     {
-        if (verbose) {
-            cerr << "Waiting for confirmation that Ultrasonix has frozen.\n";
+        while (ult.getFreezeState() != 1)
+        {
+            if (verbose) {
+                cerr << "Waiting for confirmation that Ultrasonix has frozen.\n";
+            }
         }
     }
     /*
@@ -195,7 +250,7 @@ void Ultracomm::wait_for_freeze()
 /*
   Put ultrasonix into imaging state.
 */
-void Ultracomm::wait_for_unfreeze()
+void Ultracomm::unfreeze(const bool block)
 {
     // 1 = FROZEN; 0 = IMAGING
     if (ult.getFreezeState() != 0)
@@ -213,10 +268,13 @@ void Ultracomm::wait_for_unfreeze()
     }
     // Wait for server to acknowledge it has switched to imaging.
     // TODO: this would be safer with a timeout.
-    while (ult.getFreezeState() != 0)
+    if (block)
     {
-        if (verbose) {
-            cerr << "Waiting for confirmation that Ultrasonix is imaging.\n";
+        while (ult.getFreezeState() != 0)
+        {
+            if (verbose) {
+                cerr << "Waiting for confirmation that Ultrasonix is imaging.\n";
+            }
         }
     }
 }
@@ -439,6 +497,11 @@ bool Ultracomm::frame_callback(void* data, int type, int sz, bool cine, int frmn
 */
     lastFrame = frmnum;
     framesReceived++;
+    if (callback_verbose)
+    {
+        cerr <<  lastFrame + frame_incr << " (frmnum: " << frmnum << ")\n";
+    }
+
     // make sure we dont do an operation that takes longer than the acquisition frame rate
     //memcpy(gBuffer, data, sz);
     std::string frmint = std::to_string(long double(frmnum+frame_incr)) + "\n";
