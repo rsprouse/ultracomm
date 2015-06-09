@@ -286,7 +286,7 @@ void Ultracomm::freeze(const bool block)
                 cerr << "Waiting for confirmation that Ultrasonix has frozen.\n";
 //                cout << "cout: Waiting for confirmation that Ultrasonix has frozen.\n";
 //            }
-            //Sleep(100);
+            Sleep(10);
         }
     }
     /*
@@ -360,7 +360,7 @@ void Ultracomm::unfreeze(const bool block)
                 cerr << "Waiting for confirmation that Ultrasonix is imaging.\n";
 //                cout << "cout: Waiting for confirmation that Ultrasonix is imaging.\n";
 //            }
-            //Sleep(100);
+            Sleep(10);
         }
     }
 }
