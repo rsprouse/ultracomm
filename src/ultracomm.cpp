@@ -75,7 +75,7 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt)
             throw OutputError();
         }
         myindexstream = &outindexfile;
-        std::string outlogname = outname + ".log.txt";
+        //std::string outlogname = outname + ".log.txt";
         //mylog.open(outlogname, ios::out | ios::binary);
         //if (mylog.fail())
         //{
