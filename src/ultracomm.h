@@ -67,7 +67,7 @@ public:
     void freeze(const bool block);
     void unfreeze(const bool block);
     void dump_params();
-    void set_int_imaging_params();
+    void set_int_imaging_params(const bool lazy);
     void check_int_imaging_params();
     void save_data();
     void write_header(ofstream& outfile, const uDataDesc& desc, const int& num_frames);

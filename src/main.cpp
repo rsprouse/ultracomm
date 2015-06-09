@@ -9,6 +9,7 @@ int main(int argc, char* argv[])
 
     int exit_status;
     const bool blocking = true;  // block until ulterius commands have succeeded
+    const bool lazy_param_set = true;  // Do not set ultrasound params if they already have the correct value.
     try {
         // Get command line and config file options.
         UltracommOptions uopt = UltracommOptions::UltracommOptions(argc, argv);
@@ -16,6 +17,8 @@ int main(int argc, char* argv[])
         
         // Connect to Ultrasonix and set parameters.
         Ultracomm uc = Ultracomm::Ultracomm(uopt);
+        uc.set_int_imaging_params(lazy_param_set);
+        uc.check_int_imaging_params();
         uc.freeze(blocking);
         
         if (uopt.opt.count("dump-params")) {

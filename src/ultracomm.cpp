@@ -33,8 +33,8 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt)
         cerr << "Setting data to acquire to datatype " << datatype << ".\n";
     }
 //    ult.setDataToAcquire(datatype);
-    set_int_imaging_params();
-    check_int_imaging_params();
+//    set_int_imaging_params();
+//    check_int_imaging_params();
     const int compstat = uopt.opt["compression_status"].as<int>();
     if (verbose) {
         cerr << "Setting compression status to " << compstat << ".\n";
@@ -218,9 +218,11 @@ void Ultracomm::freeze(const bool block)
     {
         while (ult.getFreezeState() != 1)
         {
-            if (verbose) {
+//            if (verbose) {
                 cerr << "Waiting for confirmation that Ultrasonix has frozen.\n";
-            }
+//                cout << "cout: Waiting for confirmation that Ultrasonix has frozen.\n";
+//            }
+            //Sleep(100);
         }
     }
     /*
@@ -272,9 +274,11 @@ void Ultracomm::unfreeze(const bool block)
     {
         while (ult.getFreezeState() != 0)
         {
-            if (verbose) {
+//            if (verbose) {
                 cerr << "Waiting for confirmation that Ultrasonix is imaging.\n";
-            }
+//                cout << "cout: Waiting for confirmation that Ultrasonix is imaging.\n";
+//            }
+            //Sleep(100);
         }
     }
 }
@@ -307,8 +311,12 @@ void Ultracomm::dump_params()
 /*
     Set all integer-type Ultrasonix imaging parameters, as specified on the
     command line or in the parameter file.
+
+    If the lazy parameter is true, set each imaging parameter only when
+    necessary, i.e. if the ultrasonix already has the correct value,
+    do not set it.
 */
-void Ultracomm::set_int_imaging_params()
+void Ultracomm::set_int_imaging_params(const bool lazy)
 {
     po::variables_map params = uopt.opt;
     po::options_description iopts = uopt.int_imaging_params;
@@ -328,11 +336,20 @@ void Ultracomm::set_int_imaging_params()
         string optname = (*iter)->long_name();
         string ultname = boost::replace_all_copy(optname, "_", " ");
         if (params.count(optname)) {
-            int val = params[optname].as<int>();
-            if (verbose) {
-                cerr << "Setting '" << ultname << "' to value " << val << ".\n";
+            int val, got;
+            val = params[optname].as<int>();
+            ult.getParamValue(ultname.c_str(), got);
+            if (!lazy || got != val) {
+                if (verbose) {
+                    cerr << "Setting '" << ultname << "' to value " << val << ".\n";
+                }
+                ult.setParamValue(ultname.c_str(), val);
             }
-            ult.setParamValue(ultname.c_str(), val);
+            else {
+                if (verbose) {
+                    cerr << "Did not set '" << ultname << "' to value " << val << ".\n";
+                }
+            }
         }
     }
 }
