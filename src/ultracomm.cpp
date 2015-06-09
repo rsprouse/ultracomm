@@ -12,9 +12,9 @@ int callback_verbose = 0;
    The Ultracomm object is not available in the callback, so we copy some of
    its attributes into file-local variables that the callback can access.
 */
-ofstream* mystream;
+ofstream datafile;
 int myframesize;
-ofstream* myindexstream;
+ofstream indexfile;
 //ofstream mylog;
 //FILE *mylog;
 
@@ -62,19 +62,17 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt)
     if (! uopt.opt.count("freeze-only"))
     {
         std::string outname = myuopt.opt["output"].as<string>();
-        outfile.open(outname, ios::out | ios::binary);
-        if (outfile.fail())
+        datafile.open(outname, ios::out | ios::binary);
+        if (datafile.fail())
         {
             throw OutputError();
         }
-        mystream = &outfile;
         std::string outindexname = outname + ".idx.txt";
-        outindexfile.open(outindexname, ios::out | ios::binary);
-        if (outindexfile.fail())
+        indexfile.open(outindexname, ios::out | ios::binary);
+        if (indexfile.fail())
         {
             throw OutputError();
         }
-        myindexstream = &outindexfile;
         //std::string outlogname = outname + ".log.txt";
         //mylog.open(outlogname, ios::out | ios::binary);
         //if (mylog.fail())
@@ -83,7 +81,7 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt)
         //}
         if (acqmode == "continuous") {
             ult.setCallback(frame_callback);
-            write_header(outfile, desc, 0);
+            write_header(desc, 0);
         }
     }
 }
@@ -102,24 +100,12 @@ Ultracomm::~Ultracomm()
     //mylog << "Closing mystream.\n";
     //mylog.flush();
     //mystream->close();
-    mylog << "Flushing myindexstream.\n";
+    mylog << "Flushing datafile.\n";
     mylog.flush();
-    myindexstream->flush();
-    //mylog << "Closing myindexstream.\n";
-    //mylog.flush();
-    //myindexstream->close();
-    mylog << "Flushing outfile.\n";
+    datafile.flush();
+    mylog << "Closing datafile.\n";
     mylog.flush();
-    outfile.flush();
-    mylog << "Closing outfile.\n";
-    mylog.flush();
-    outfile.close();
-    mylog << "Flushing outindexfile.\n";
-    mylog.flush();
-    outindexfile.flush();
-    mylog << "Closing outindexfile.\n";
-    mylog.flush();
-    outindexfile.close();
+    datafile.close();
 
     mylog << "Closing log at end of destructor.\n";
     mylog.flush();
@@ -181,13 +167,11 @@ void Ultracomm::disconnect()
     //mylog.flush();
     if (! uopt.opt.count("freeze-only"))
     {
-        write_numframes_in_header(outfile, framesReceived);
-        //mylog << "Closing outfile.\n";
+        write_numframes_in_header(framesReceived);
+        //mylog << "Closing datafile.\n";
         //mylog.flush();
-        outfile.close();
-        //mylog << "Closing outindexfile.\n";
-        //mylog.flush();
-        outindexfile.close();
+        datafile.close();
+        indexfile.close();
         //printf("Last frame was %d.\n", lastFrame);
         int expected = lastFrame + frame_incr + 1;
         double pct = 100.0 * framesReceived / expected;
@@ -477,7 +461,7 @@ void Ultracomm::save_data()
     //mylog << "Saving data.\n";
     //mylog.flush();
     int num_frames = ult.getCineDataCount((uData)datatype);
-    write_header(outfile, desc, num_frames);
+    write_header(desc, num_frames);
 
     // TODO: figure out why buffer and sz makes program crash
     //const int sz = 2 * 1024 * 1024;
@@ -490,19 +474,19 @@ void Ultracomm::save_data()
             cerr << "Getting cine data for frame " << idx << ".\n";
         }
         ult.getCineData((uData)datatype, idx, false, (char**)&gBuffer, BUFFERSIZE);
-        outfile.write(gBuffer, framesize);
+        datafile.write(gBuffer, framesize);
         if (verbose) {
             cerr << "Wrote cine data for frame " << idx << ".\n";
         }
     }
-    outfile.close();
+    datafile.close();
 }
 
 /*
     TODO: header information is probably correct for .bpr files but possibly
     not for other datatypes.
 */
-void Ultracomm::write_header(ofstream& outfile, const uDataDesc& desc, const int& num_frames)
+void Ultracomm::write_header(const uDataDesc& desc, const int& num_frames)
 {
     //mylog << "Writing header.\n";
     //mylog.flush();
@@ -529,7 +513,7 @@ void Ultracomm::write_header(ofstream& outfile, const uDataDesc& desc, const int
         uopt.opt["probe-id"].as<int>()
     };
     for (int i = 0; i < sizeof(fields) / sizeof(fields[0]); ++i) {
-        outfile.write(reinterpret_cast<const char *>(&(__int32)fields[i]), isize);
+        datafile.write(reinterpret_cast<const char *>(&(__int32)fields[i]), isize);
     }
 
     // Integer fields that we have to query from Ultrasonix. These are also
@@ -544,25 +528,25 @@ void Ultracomm::write_header(ofstream& outfile, const uDataDesc& desc, const int
     for (int i = 0; i < sizeof(queries) / sizeof(queries[0]); ++i) {
         int val;
         ult.getParamValue(queries[i].c_str(), val);
-        outfile.write(reinterpret_cast<const char *>(&(__int32)val), isize);
+        datafile.write(reinterpret_cast<const char *>(&(__int32)val), isize);
     }
     // FIXME: Figure out how to determine the value of the 'extra' field.
     // It will probably be added to queries[], but I don't know the param name.
     // For now we'll hard code it with value 0.
     int extra = 0;
-    outfile.write(reinterpret_cast<const char *>(&(__int32)extra), isize);
+    datafile.write(reinterpret_cast<const char *>(&(__int32)extra), isize);
 }
 
 /*
     TODO: kind of a hack.
 */
-void Ultracomm::write_numframes_in_header(ofstream& outfile, const int& num_frames)
+void Ultracomm::write_numframes_in_header(const int& num_frames)
 {
     //mylog << "Writing numframes in header.\n";
     //mylog.flush();
     const int isize = sizeof(__int32);
-    outfile.seekp(isize);
-    outfile.write(reinterpret_cast<const char *>(&(__int32)num_frames), isize);
+    datafile.seekp(isize);
+    datafile.write(reinterpret_cast<const char *>(&(__int32)num_frames), isize);
     //mylog << "Wrote numframes in header.\n";
     //mylog.flush();
 }
@@ -614,8 +598,8 @@ bool Ultracomm::frame_callback(void* data, int type, int sz, bool cine, int frmn
     // make sure we dont do an operation that takes longer than the acquisition frame rate
     //memcpy(gBuffer, data, sz);
     std::string frmint = std::to_string(long double(frmnum+frame_incr)) + "\n";
-    myindexstream->write(frmint.c_str(), frmint.size());
-    mystream->write((const char*)data, sz);
+    indexfile.write(frmint.c_str(), frmint.size());
+    datafile.write((const char*)data, sz);
 
     return true;
 }
