@@ -15,6 +15,8 @@ int callback_verbose = 0;
 ofstream* mystream;
 int myframesize;
 ofstream* myindexstream;
+//ofstream mylog;
+//FILE *mylog;
 
 /*
     Construct Ultracomm object, connect to server,
@@ -73,6 +75,12 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt)
             throw OutputError();
         }
         myindexstream = &outindexfile;
+        std::string outlogname = outname + ".log.txt";
+        //mylog.open(outlogname, ios::out | ios::binary);
+        //if (mylog.fail())
+        //{
+        //    throw OutputError();
+        //}
         if (acqmode == "continuous") {
             ult.setCallback(frame_callback);
             write_header(outfile, desc, 0);
@@ -85,6 +93,39 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt)
 */
 Ultracomm::~Ultracomm()
 {
+/*
+    mylog << "In destructor.\n";
+    mylog.flush();
+    mylog << "Flushing mystream.\n";
+    mylog.flush();
+    mystream->flush();
+    //mylog << "Closing mystream.\n";
+    //mylog.flush();
+    //mystream->close();
+    mylog << "Flushing myindexstream.\n";
+    mylog.flush();
+    myindexstream->flush();
+    //mylog << "Closing myindexstream.\n";
+    //mylog.flush();
+    //myindexstream->close();
+    mylog << "Flushing outfile.\n";
+    mylog.flush();
+    outfile.flush();
+    mylog << "Closing outfile.\n";
+    mylog.flush();
+    outfile.close();
+    mylog << "Flushing outindexfile.\n";
+    mylog.flush();
+    outindexfile.flush();
+    mylog << "Closing outindexfile.\n";
+    mylog.flush();
+    outindexfile.close();
+
+    mylog << "Closing log at end of destructor.\n";
+    mylog.flush();
+    mylog.close();
+    //delete mylog;
+*/
 }
 
 /*
@@ -92,6 +133,8 @@ Ultracomm::~Ultracomm()
 */
 void Ultracomm::connect()
 {
+    //mylog << "Connecting to ultrasonix.\n";
+    //mylog.flush();
     if (verbose) {
         cerr << "Connecting to ultrasonix at address " << address << ".\n";
     }
@@ -134,10 +177,16 @@ ould not connect to Ultrasonix.
 */
 void Ultracomm::disconnect()
 {
+    //mylog << "Disconnecting from ultrasonix.\n";
+    //mylog.flush();
     if (! uopt.opt.count("freeze-only"))
     {
         write_numframes_in_header(outfile, framesReceived);
+        //mylog << "Closing outfile.\n";
+        //mylog.flush();
         outfile.close();
+        //mylog << "Closing outindexfile.\n";
+        //mylog.flush();
         outindexfile.close();
         //printf("Last frame was %d.\n", lastFrame);
         int expected = lastFrame + frame_incr + 1;
@@ -153,17 +202,25 @@ void Ultracomm::disconnect()
     }
     if (ult.isConnected())
     {
+        //mylog << "Disconnecting from ultrasonix.\n";
+        //mylog.flush();
         if (verbose) {
             cerr << "Disconnecting from Ultrasonix.\n";
         }
         ult.disconnect();
+        //mylog << "Disconnected from ultrasonix.\n";
+        //mylog.flush();
     }
     else
     {
+        //mylog << "Already disconnected from ultrasonix.\n";
+        //mylog.flush();
         if (verbose) {
             cerr << "Already disconnected from Ultrasonix.\n";
         }
     }
+    //mylog << "Disconnected.\n";
+    //mylog.flush();
 }
 
 /*
@@ -171,6 +228,8 @@ void Ultracomm::disconnect()
 */
 void Ultracomm::set_data_to_acquire(const bool block)
 {
+    //mylog << "Setting data to acquire.\n";
+    //mylog.flush();
     ult.setDataToAcquire(datatype);
     if (block)
     {
@@ -188,6 +247,8 @@ void Ultracomm::set_data_to_acquire(const bool block)
 */
 void Ultracomm::unset_data_to_acquire(const bool block)
 {
+    //mylog << "Unsetting data to acquire.\n";
+    //mylog.flush();
     ult.setDataToAcquire(0);
     if (block)
     {
@@ -205,9 +266,13 @@ void Ultracomm::unset_data_to_acquire(const bool block)
 */
 void Ultracomm::freeze(const bool block)
 {
+    //mylog << "Freezing.\n";
+    //mylog.flush();
     // 1 = FROZEN; 0 = IMAGING
     if (ult.getFreezeState() != 1)
     {
+        //mylog << "Freezing ultrasonix.\n";
+        //mylog.flush();
         if (verbose) {
             cerr << "Freezing Ultrasonix.\n";
         }
@@ -215,6 +280,8 @@ void Ultracomm::freeze(const bool block)
     }
     else
     {
+        //mylog << "Ultrasonix already frozen.\n";
+        //mylog.flush();
         if (verbose) {
             cerr << "Ultrasonix already frozen.\n";
         }
@@ -225,6 +292,8 @@ void Ultracomm::freeze(const bool block)
     {
         while (ult.getFreezeState() != 1)
         {
+            //mylog << "Waiting for confirmation that ultrasonix has frozen.\n";
+            //mylog.flush();
 //            if (verbose) {
                 cerr << "Waiting for confirmation that Ultrasonix has frozen.\n";
 //                cout << "cout: Waiting for confirmation that Ultrasonix has frozen.\n";
@@ -261,9 +330,13 @@ void Ultracomm::freeze(const bool block)
 */
 void Ultracomm::unfreeze(const bool block)
 {
+    //mylog << "Unfreezing.\n";
+    //mylog.flush();
     // 1 = FROZEN; 0 = IMAGING
     if (ult.getFreezeState() != 0)
     {
+        //mylog << "Unfreezing ultrasonix.\n";
+        //mylog.flush();
         if (verbose) {
             cerr << "Unfreezing Ultrasonix.\n";
         }
@@ -271,6 +344,8 @@ void Ultracomm::unfreeze(const bool block)
     }
     else
     {
+        //mylog << "Ultrasonix already imaging.\n";
+        //mylog.flush();
         if (verbose) {
             cerr << "Ultrasonix already imaging.\n";
         }
@@ -281,6 +356,8 @@ void Ultracomm::unfreeze(const bool block)
     {
         while (ult.getFreezeState() != 0)
         {
+            //mylog << "Waiting for confirmation that Ultrasonix is imaging.\n";
+            //mylog.flush();
 //            if (verbose) {
                 cerr << "Waiting for confirmation that Ultrasonix is imaging.\n";
 //                cout << "cout: Waiting for confirmation that Ultrasonix is imaging.\n";
@@ -397,6 +474,8 @@ void Ultracomm::check_int_imaging_params()
 */
 void Ultracomm::save_data()
 {
+    //mylog << "Saving data.\n";
+    //mylog.flush();
     int num_frames = ult.getCineDataCount((uData)datatype);
     write_header(outfile, desc, num_frames);
 
@@ -425,6 +504,8 @@ void Ultracomm::save_data()
 */
 void Ultracomm::write_header(ofstream& outfile, const uDataDesc& desc, const int& num_frames)
 {
+    //mylog << "Writing header.\n";
+    //mylog.flush();
     if (verbose) {
         cerr << "Writing header.\n";
     }
@@ -477,9 +558,13 @@ void Ultracomm::write_header(ofstream& outfile, const uDataDesc& desc, const int
 */
 void Ultracomm::write_numframes_in_header(ofstream& outfile, const int& num_frames)
 {
+    //mylog << "Writing numframes in header.\n";
+    //mylog.flush();
     const int isize = sizeof(__int32);
     outfile.seekp(isize);
     outfile.write(reinterpret_cast<const char *>(&(__int32)num_frames), isize);
+    //mylog << "Wrote numframes in header.\n";
+    //mylog.flush();
 }
 
 
