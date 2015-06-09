@@ -73,6 +73,8 @@ public:
     void write_header(const uDataDesc& desc, const int& num_frames);
     void write_numframes_in_header(const int& num_frames);
     static bool frame_callback(void* data, int type, int sz, bool cine, int frmnum);
+    static bool frame_callback_noop(void* data, int type, int sz, bool cine, int frmnum);
+    static bool frame_callback_ignore_data(void* data, int type, int sz, bool cine, int frmnum);
 
 };
 

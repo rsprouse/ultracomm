@@ -82,7 +82,7 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt, ofstream& mylogfile)
         //    throw OutputError();
         //}
         if (acqmode == "continuous") {
-            ult.setCallback(frame_callback);
+            //ult.setCallback(frame_callback);
             write_header(desc, 0);
         }
     }
@@ -94,7 +94,7 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt, ofstream& mylogfile)
 Ultracomm::~Ultracomm()
 {
     GetSystemTime(&lt);
-    logfile << "uc: In destructor. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+    logfile << "uc: In destructor. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
     logfile.flush();
 /*
     mylog << "Flushing datafile.\n";
@@ -106,7 +106,7 @@ Ultracomm::~Ultracomm()
 
 */
     GetSystemTime(&lt);
-    logfile << "uc: Closing log at end of destructor. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+    logfile << "uc: Flushing log at end of destructor. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
     logfile.flush();
 }
 
@@ -245,13 +245,19 @@ void Ultracomm::unset_data_to_acquire(const bool block)
 void Ultracomm::freeze(const bool block)
 {
     GetSystemTime(&lt);
-    logfile << "uc: Freezing. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+    logfile << "uc: Freezing. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
     logfile.flush();
+    if (acqmode == "continuous") {
+        ult.setCallback(frame_callback_noop);
+        GetSystemTime(&lt);
+        logfile << "uc: Setting callback to no-op. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
+        logfile.flush();
+    }
     // 1 = FROZEN; 0 = IMAGING
     if (ult.getFreezeState() != 1)
     {
         GetSystemTime(&lt);
-        logfile << "uc: Freezing ultrasonix. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+        logfile << "uc: Freezing ultrasonix. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
         logfile.flush();
         if (verbose) {
             cerr << "Freezing Ultrasonix.\n";
@@ -261,7 +267,7 @@ void Ultracomm::freeze(const bool block)
     else
     {
         GetSystemTime(&lt);
-        logfile << "uc: Ultrasonix already frozen. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+        logfile << "uc: Ultrasonix already frozen. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
         logfile.flush();
         if (verbose) {
             cerr << "Ultrasonix already frozen.\n";
@@ -274,7 +280,7 @@ void Ultracomm::freeze(const bool block)
         while (ult.getFreezeState() != 1)
         {
             GetSystemTime(&lt);
-            logfile << "uc: Waiting for confirmation that ultrasonix has frozen. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+            logfile << "uc: Waiting for confirmation that ultrasonix has frozen. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
             logfile.flush();
 //            if (verbose) {
                 cerr << "Waiting for confirmation that Ultrasonix has frozen.\n";
@@ -313,13 +319,19 @@ void Ultracomm::freeze(const bool block)
 void Ultracomm::unfreeze(const bool block)
 {
     GetSystemTime(&lt);
-    logfile << "uc: Unfreezing. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+    logfile << "uc: Unfreezing. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
     logfile.flush();
+    if (acqmode == "continuous") {
+        ult.setCallback(frame_callback);
+        GetSystemTime(&lt);
+        logfile << "uc: Setting callback to save data. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
+        logfile.flush();
+    }
     // 1 = FROZEN; 0 = IMAGING
     if (ult.getFreezeState() != 0)
     {
         GetSystemTime(&lt);
-        logfile << "uc: Unfreezing ultrasonix. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+        logfile << "uc: Unfreezing ultrasonix. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
         logfile.flush();
         if (verbose) {
             cerr << "Unfreezing Ultrasonix.\n";
@@ -329,7 +341,7 @@ void Ultracomm::unfreeze(const bool block)
     else
     {
         GetSystemTime(&lt);
-        logfile << "uc: Ultrasonix already imaging. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+        logfile << "uc: Ultrasonix already imaging. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
         logfile.flush();
         if (verbose) {
             cerr << "Ultrasonix already imaging.\n";
@@ -342,7 +354,7 @@ void Ultracomm::unfreeze(const bool block)
         while (ult.getFreezeState() != 0)
         {
             GetSystemTime(&lt);
-            logfile << "uc: Waiting for confirmation that Ultrasonix is imaging. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+            logfile << "uc: Waiting for confirmation that Ultrasonix is imaging. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
             logfile.flush();
 //            if (verbose) {
                 cerr << "Waiting for confirmation that Ultrasonix is imaging.\n";
@@ -597,7 +609,7 @@ bool Ultracomm::frame_callback(void* data, int type, int sz, bool cine, int frmn
     }
 
     GetSystemTime(&lt);
-    *logfile_p << "callback: lastFrame + frame_incr = " << lastFrame + frame_incr << " (frmnum: " << frmnum << "). Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+    *logfile_p << "callback: lastFrame + frame_incr = " << lastFrame + frame_incr << " (frmnum: " << frmnum << "). Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ". ";
     logfile_p->flush();
 
     // make sure we dont do an operation that takes longer than the acquisition frame rate
@@ -605,6 +617,67 @@ bool Ultracomm::frame_callback(void* data, int type, int sz, bool cine, int frmn
     std::string frmint = std::to_string(long double(frmnum+frame_incr)) + "\n";
     indexfile.write(frmint.c_str(), frmint.size());
     datafile.write((const char*)data, sz);
+
+    GetSystemTime(&lt);
+    *logfile_p << "Exiting: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+    logfile_p->flush();
+    return true;
+}
+
+/*
+    No-op callback.
+*/
+bool Ultracomm::frame_callback_noop(void* data, int type, int sz, bool cine, int frmnum)
+{
+    return true;
+}
+
+/*
+    Callback that ignores the received data.
+*/
+bool Ultracomm::frame_callback_ignore_data(void* data, int type, int sz, bool cine, int frmnum)
+{
+/*
+    if (verbose) {
+        cerr << "In callback.\n";
+    }
+
+    if (!data || !sz)
+    {
+// TODO: proper error
+        printf("Error: no actual frame data received\n");
+        return false;
+    }
+
+    if (BUFFERSIZE < sz)
+    {
+// TODO: proper error
+        printf("Error: frame too large for current buffer\n");
+        return false;
+    }
+*/
+
+    //printf("[Rx] type:(%d) size:(%d) cine:(%d) gBuffer:(%d) frame:(%d)\n", type, sz, cine, &gBuffer, frmnum);
+//    printf("%d\n", frmnum);
+    // Check to see whether the frmnum index has wrapped past its maximum value.
+    if (frmnum < lastFrame) {
+        frame_incr += maxFrameIndex + 1;
+    }
+/*
+    if (frmnum != lastFrame + 1) {
+        printf("Skipped frame(s) %d - %d.\n", lastFrame + 1, frmnum - 1);
+    }
+*/
+    lastFrame = frmnum;
+    framesReceived++;
+    if (callback_verbose)
+    {
+        cerr <<  "Ignoring " << lastFrame + frame_incr << " (frmnum: " << frmnum << ")\n";
+    }
+
+    GetSystemTime(&lt);
+    *logfile_p << "callback_ignore_data: lastFrame + frame_incr = " << lastFrame + frame_incr << " (frmnum: " << frmnum << "). Exiting at localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
+    logfile_p->flush();
 
     return true;
 }
