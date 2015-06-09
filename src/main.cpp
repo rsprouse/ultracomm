@@ -25,9 +25,15 @@ int main(int argc, char* argv[])
         {
             throw std::runtime_error("Could not open logfile.");
         }
+        GetSystemTime(&lt);
+        logfile << "main: Connecting to ultracomm. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+        logfile.flush();
 
         // Connect to Ultrasonix and set parameters.
         Ultracomm uc = Ultracomm::Ultracomm(uopt, logfile);
+        GetSystemTime(&lt);
+        logfile << "main: Setting parameters. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+        logfile.flush();
         uc.set_int_imaging_params(lazy_param_set);
         uc.check_int_imaging_params();
         uc.freeze(blocking);
