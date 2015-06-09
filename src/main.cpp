@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
             // Start acquisition, wait for user interaction, then stop.
 //            uc.unset_data_to_acquire(blocking);
             uc.set_data_to_acquire(blocking);
-            uc.freeze(blocking);
+            //uc.freeze(blocking);
             uc.unfreeze(blocking);
             if (! uopt.opt.count("named-pipe")) {
                 cout << "*** Acquiring images. Press any key to stop. ***\n";
