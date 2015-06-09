@@ -15,20 +15,22 @@ int callback_verbose = 0;
 ofstream datafile;
 int myframesize;
 ofstream indexfile;
-//ofstream mylog;
-//FILE *mylog;
+ofstream* logfile_p;
+SYSTEMTIME lt;
 
 /*
     Construct Ultracomm object, connect to server,
     and set/check parameters.
 */
-Ultracomm::Ultracomm(const UltracommOptions& myuopt)
+Ultracomm::Ultracomm(const UltracommOptions& myuopt, ofstream& mylogfile)
     : uopt(myuopt),
       address(myuopt.opt["address"].as<string>()),
       acqmode(myuopt.opt["acqmode"].as<string>()),
       datatype(myuopt.opt["datatype"].as<int>()),
-      verbose(myuopt.opt["verbose"].as<int>())
+      verbose(myuopt.opt["verbose"].as<int>()),
+      logfile(mylogfile)
 {
+    logfile_p = &logfile;
     connect();
     callback_verbose = verbose;
     if (verbose) {
@@ -91,15 +93,10 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt)
 */
 Ultracomm::~Ultracomm()
 {
+    GetSystemTime(&lt);
+    logfile << "uc: In destructor. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+    logfile.flush();
 /*
-    mylog << "In destructor.\n";
-    mylog.flush();
-    mylog << "Flushing mystream.\n";
-    mylog.flush();
-    mystream->flush();
-    //mylog << "Closing mystream.\n";
-    //mylog.flush();
-    //mystream->close();
     mylog << "Flushing datafile.\n";
     mylog.flush();
     datafile.flush();
@@ -107,11 +104,10 @@ Ultracomm::~Ultracomm()
     mylog.flush();
     datafile.close();
 
-    mylog << "Closing log at end of destructor.\n";
-    mylog.flush();
-    mylog.close();
-    //delete mylog;
 */
+    GetSystemTime(&lt);
+    logfile << "uc: Closing log at end of destructor. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+    logfile.flush();
 }
 
 /*
@@ -248,13 +244,15 @@ void Ultracomm::unset_data_to_acquire(const bool block)
 */
 void Ultracomm::freeze(const bool block)
 {
-    //mylog << "Freezing.\n";
-    //mylog.flush();
+    GetSystemTime(&lt);
+    logfile << "uc: Freezing. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+    logfile.flush();
     // 1 = FROZEN; 0 = IMAGING
     if (ult.getFreezeState() != 1)
     {
-        //mylog << "Freezing ultrasonix.\n";
-        //mylog.flush();
+        GetSystemTime(&lt);
+        logfile << "uc: Freezing ultrasonix. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+        logfile.flush();
         if (verbose) {
             cerr << "Freezing Ultrasonix.\n";
         }
@@ -262,8 +260,9 @@ void Ultracomm::freeze(const bool block)
     }
     else
     {
-        //mylog << "Ultrasonix already frozen.\n";
-        //mylog.flush();
+        GetSystemTime(&lt);
+        logfile << "uc: Ultrasonix already frozen. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+        logfile.flush();
         if (verbose) {
             cerr << "Ultrasonix already frozen.\n";
         }
@@ -274,8 +273,9 @@ void Ultracomm::freeze(const bool block)
     {
         while (ult.getFreezeState() != 1)
         {
-            //mylog << "Waiting for confirmation that ultrasonix has frozen.\n";
-            //mylog.flush();
+            GetSystemTime(&lt);
+            logfile << "uc: Waiting for confirmation that ultrasonix has frozen. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+            logfile.flush();
 //            if (verbose) {
                 cerr << "Waiting for confirmation that Ultrasonix has frozen.\n";
 //                cout << "cout: Waiting for confirmation that Ultrasonix has frozen.\n";
@@ -312,13 +312,15 @@ void Ultracomm::freeze(const bool block)
 */
 void Ultracomm::unfreeze(const bool block)
 {
-    //mylog << "Unfreezing.\n";
-    //mylog.flush();
+    GetSystemTime(&lt);
+    logfile << "uc: Unfreezing. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+    logfile.flush();
     // 1 = FROZEN; 0 = IMAGING
     if (ult.getFreezeState() != 0)
     {
-        //mylog << "Unfreezing ultrasonix.\n";
-        //mylog.flush();
+        GetSystemTime(&lt);
+        logfile << "uc: Unfreezing ultrasonix. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+        logfile.flush();
         if (verbose) {
             cerr << "Unfreezing Ultrasonix.\n";
         }
@@ -326,8 +328,9 @@ void Ultracomm::unfreeze(const bool block)
     }
     else
     {
-        //mylog << "Ultrasonix already imaging.\n";
-        //mylog.flush();
+        GetSystemTime(&lt);
+        logfile << "uc: Ultrasonix already imaging. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+        logfile.flush();
         if (verbose) {
             cerr << "Ultrasonix already imaging.\n";
         }
@@ -338,8 +341,9 @@ void Ultracomm::unfreeze(const bool block)
     {
         while (ult.getFreezeState() != 0)
         {
-            //mylog << "Waiting for confirmation that Ultrasonix is imaging.\n";
-            //mylog.flush();
+            GetSystemTime(&lt);
+            logfile << "uc: Waiting for confirmation that Ultrasonix is imaging. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+            logfile.flush();
 //            if (verbose) {
                 cerr << "Waiting for confirmation that Ultrasonix is imaging.\n";
 //                cout << "cout: Waiting for confirmation that Ultrasonix is imaging.\n";
@@ -591,6 +595,10 @@ bool Ultracomm::frame_callback(void* data, int type, int sz, bool cine, int frmn
     {
         cerr <<  lastFrame + frame_incr << " (frmnum: " << frmnum << ")\n";
     }
+
+    GetSystemTime(&lt);
+    *logfile_p << "callback: lastFrame + frame_incr = " << lastFrame + frame_incr << " (frmnum: " << frmnum << "). Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+    logfile_p->flush();
 
     // make sure we dont do an operation that takes longer than the acquisition frame rate
     //memcpy(gBuffer, data, sz);

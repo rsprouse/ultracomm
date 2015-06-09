@@ -10,13 +10,24 @@ int main(int argc, char* argv[])
     int exit_status;
     const bool blocking = true;  // block until ulterius commands have succeeded
     const bool lazy_param_set = true;  // Do not set ultrasound params if they already have the correct value.
+    ofstream logfile;    // Log file.
+    SYSTEMTIME lt;
+
     try {
         // Get command line and config file options.
         UltracommOptions uopt = UltracommOptions::UltracommOptions(argc, argv);
         int verbose = uopt.opt["verbose"].as<int>();
-        
+
+        std::string outname = uopt.opt["output"].as<string>();
+        std::string logname = outname + ".log.txt";
+        logfile.open(logname, ios::out | ios::binary);
+        if (logfile.fail())
+        {
+            throw std::runtime_error("Could not open logfile.");
+        }
+
         // Connect to Ultrasonix and set parameters.
-        Ultracomm uc = Ultracomm::Ultracomm(uopt);
+        Ultracomm uc = Ultracomm::Ultracomm(uopt, logfile);
         uc.set_int_imaging_params(lazy_param_set);
         uc.check_int_imaging_params();
         uc.freeze(blocking);
@@ -60,6 +71,9 @@ int main(int argc, char* argv[])
             _getch();  // Wait for user input.
         }
         uc.disconnect();
+        GetSystemTime(&lt);
+        logfile << "main: disconnected from ultracomm. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+        logfile.flush();
         exit_status = EXIT_SUCCESS;
     }
     catch(const UltracommOptions::WantsToStop& e) {   // --help or --version
@@ -97,6 +111,9 @@ int main(int argc, char* argv[])
         exit_status = UNKNOWN_ERROR;
     }
 
+    GetSystemTime(&lt);
+    logfile << "main: Exiting. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+    logfile.flush();
     return exit_status;
 }
 

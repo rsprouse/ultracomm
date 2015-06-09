@@ -18,6 +18,7 @@ class Ultracomm
     uDataDesc desc;                // data descriptor
     int framesize;           // size of frame image
     const int verbose;             // verbosity
+    ofstream& logfile;              // log file
 
 public:
     struct ConnectionError : public exception
@@ -57,7 +58,7 @@ public:
     };
 
 
-    Ultracomm(const UltracommOptions& uopt);
+    Ultracomm(const UltracommOptions& myuopt, ofstream& mylogfile);
     ~Ultracomm();
     void connect();
     void disconnect();
