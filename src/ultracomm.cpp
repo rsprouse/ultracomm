@@ -170,8 +170,6 @@ void Ultracomm::disconnect()
         write_numframes_in_header(framesReceived);
         //mylog << "Closing datafile.\n";
         //mylog.flush();
-        datafile.close();
-        indexfile.close();
         //printf("Last frame was %d.\n", lastFrame);
         int expected = lastFrame + frame_incr + 1;
         double pct = 100.0 * framesReceived / expected;
@@ -479,7 +477,6 @@ void Ultracomm::save_data()
             cerr << "Wrote cine data for frame " << idx << ".\n";
         }
     }
-    datafile.close();
 }
 
 /*
