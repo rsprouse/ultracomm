@@ -8,12 +8,12 @@ INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/common.cmake)
 
 ## Ultrasonix SDK ##
 # Location of Ultrasonix SDK on your system.
-SET(ULTRASONIX_SDK_PATH "C:/src/sdk610")
+SET(ULTRASONIX_SDK_PATH "C:/src/sdk611")
 
 # The Ultrasonix SDK version number
 SET(Ulterius_sdk_VERSION_MAJOR "6")
 SET(Ulterius_sdk_VERSION_MINOR "1")
-SET(Ulterius_sdk_VERSION_PATCH "0")
+SET(Ulterius_sdk_VERSION_PATCH "1")
 
 # Name of ulterius library. This might be ulterius.lib or ulterius_old.lib,
 # depending on your version of the Ultrasonix SDK.
