@@ -60,6 +60,7 @@ public:
 
 
     Ultracomm(const UltracommOptions& uopt);
+    ~Ultracomm();
     void connect();
     void disconnect();
     void set_data_to_acquire(const bool block);

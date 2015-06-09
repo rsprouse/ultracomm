@@ -81,6 +81,13 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt)
 }
 
 /*
+   Class destructor.
+*/
+Ultracomm::~Ultracomm()
+{
+}
+
+/*
    Connect to the Ultrasonix.
 */
 void Ultracomm::connect()
