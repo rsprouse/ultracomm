@@ -16,4 +16,4 @@
 #define CONNECTION_ERROR 100
 
 // Unknown.
-#define UNKNOWN_ERROR 1000
+#define UNKNOWN_ERROR 255
