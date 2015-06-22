@@ -96,15 +96,6 @@ Ultracomm::~Ultracomm()
     GetSystemTime(&lt);
     logfile << "uc: In destructor. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
     logfile.flush();
-/*
-    mylog << "Flushing datafile.\n";
-    mylog.flush();
-    datafile.flush();
-    mylog << "Closing datafile.\n";
-    mylog.flush();
-    datafile.close();
-
-*/
     GetSystemTime(&lt);
     logfile << "uc: Flushing log at end of destructor. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
     logfile.flush();
