@@ -109,10 +109,14 @@ int main(int argc, char* argv[])
         exit_status = CONNECTION_ERROR;
     }
     catch(const exception& e) {
+        logfile << "main: Caught generic exception. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+        logfile.flush();
         cerr << "Exception: " << e.what() << "\n";
         exit_status = UNKNOWN_ERROR;
     }
     catch(...) {
+        logfile << "main: Caught unhandled exception. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+        logfile.flush();
         cerr << "Unhandled exception of unknown type!\n";
         exit_status = UNKNOWN_ERROR;
     }
