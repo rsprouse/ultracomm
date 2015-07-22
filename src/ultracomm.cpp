@@ -106,15 +106,18 @@ Ultracomm::~Ultracomm()
 */
 void Ultracomm::connect()
 {
-    //mylog << "Connecting to ultrasonix.\n";
-    //mylog.flush();
     if (verbose) {
         cerr << "Connecting to ultrasonix at address " << address << ".\n";
     }
+    ult.setMessaging(false);
+    logfile << "Connecting to ultrasonix at address " << address << ".\n";
+    logfile.flush();
     if (!ult.connect(address.c_str()))
     {
         throw ConnectionError();
     }
+    logfile << "Connected to ultrasonix.\n";
+    logfile.flush();
     // Stop streaming, if necessary.
     //if (ult.getStreamStatus()) {
     //    ult.stopStream();
@@ -155,6 +158,12 @@ void Ultracomm::disconnect()
     if (! uopt.opt.count("freeze-only"))
     {
         write_numframes_in_header(framesReceived);
+        // TODO: this should be a little cleaner, i.e. depend on open status,
+        // not on option values. Maybe have a separate method for closing files.
+        datafile.flush();
+        datafile.close();
+        indexfile.flush();
+        indexfile.close();
         //mylog << "Closing datafile.\n";
         //mylog.flush();
         //printf("Last frame was %d.\n", lastFrame);
@@ -188,8 +197,6 @@ void Ultracomm::disconnect()
             cerr << "Already disconnected from Ultrasonix.\n";
         }
     }
-    //mylog << "Disconnected.\n";
-    //mylog.flush();
 }
 
 /*
