@@ -97,31 +97,33 @@ int main(int argc, char* argv[])
         exit_status = EXIT_SUCCESS;
     }
     catch(const po::required_option& e) {
+        cerr << "Caught required_option error.\n";
         cerr << "Missing required option: " << e.what() << "\n";
         exit_status = MISSING_REQUIRED_OPTION_ERROR;
     }
     catch(const UltracommOptions::MissingOptionsFileError& e) {
+        cerr << "Caught MissingOptionsFileError.\n";
         cerr << e.what() << "\n";
         exit_status = MISSING_OPTIONS_FILE_ERROR;
     }
     catch(const UltracommOptions::UnimplementedFeatureError& e) {
+        cerr << "Caught UnimplementedFeatureError.\n";
         cerr << e.what() << "\n";
         exit_status = UNIMPLEMENTED_FEATURE_ERROR;
     }
     catch(const Ultracomm::ConnectionError& e) {
+        cerr << "Caught ConnectionError.\n";
         cerr << e.what() << "\n";
         exit_status = CONNECTION_ERROR;
     }
     catch(const exception& e) {
-        logfile << "main: Caught generic exception. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
-        logfile.flush();
         cerr << "Exception: " << e.what() << "\n";
+        logfile.flush();
         exit_status = UNKNOWN_ERROR;
     }
     catch(...) {
-        logfile << "main: Caught unhandled exception. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
-        logfile.flush();
         cerr << "Unhandled exception of unknown type!\n";
+        logfile.flush();
         exit_status = UNKNOWN_ERROR;
     }
 
