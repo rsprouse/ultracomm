@@ -8,6 +8,10 @@ int main(int argc, char* argv[])
 {
 
     int exit_status;
+
+    /* Temporary hack to swallow access violation errors at program end. */
+    SetErrorMode(SetErrorMode(0) | SEM_NOGPFAULTERRORBOX | SEM_FAILCRITICALERRORS);
+
     const bool blocking = true;  // block until ulterius commands have succeeded
     const bool lazy_param_set = true;  // Do not set ultrasound params if they already have the correct value.
     ofstream logfile;    // Log file.
