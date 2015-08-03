@@ -43,6 +43,8 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt)
         throw ConnectionError();
     }
     callback_verbose = verbose;
+    ult->setParamCallback(param_callback_noop);
+
 //    if (verbose) {
 //        cerr << "Setting data to acquire to datatype " << datatype << ".\n";
 //    }
@@ -693,3 +695,10 @@ bool Ultracomm::frame_callback_ignore_data(void* data, int type, int sz, bool ci
 
     return true;
 }
+
+static bool Ultracomm::param_callback_noop(void* paramID, int ptX, int ptY)
+{
+    return true;
+}
+
+
