@@ -696,7 +696,7 @@ bool Ultracomm::frame_callback_ignore_data(void* data, int type, int sz, bool ci
     return true;
 }
 
-static bool Ultracomm::param_callback_noop(void* paramID, int ptX, int ptY)
+bool Ultracomm::param_callback_noop(void* paramID, int ptX, int ptY)
 {
     return true;
 }

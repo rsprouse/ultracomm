@@ -76,7 +76,7 @@ public:
     static bool frame_callback(void* data, int type, int sz, bool cine, int frmnum);
     static bool frame_callback_noop(void* data, int type, int sz, bool cine, int frmnum);
     static bool frame_callback_ignore_data(void* data, int type, int sz, bool cine, int frmnum);
-    static bool param_callback_noop(void* paramID, int ptX, int ptY)
+    static bool param_callback_noop(void* paramID, int ptX, int ptY);
 
 
 };
