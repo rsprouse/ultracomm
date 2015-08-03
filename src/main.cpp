@@ -4,7 +4,7 @@
     ultracomm -- main
 */
 
-int main(int argc, char* argv[])
+int mymain(int argc, char* argv[])
 {
 
     int exit_status;
@@ -14,8 +14,8 @@ int main(int argc, char* argv[])
 
     const bool blocking = true;  // block until ulterius commands have succeeded
     const bool lazy_param_set = true;  // Do not set ultrasound params if they already have the correct value.
-    ofstream logfile;    // Log file.
-    SYSTEMTIME lt;
+//    ofstream logfile;    // Log file.
+//    SYSTEMTIME lt;
 
     try {
         // Get command line and config file options.
@@ -23,21 +23,22 @@ int main(int argc, char* argv[])
         int verbose = uopt.opt["verbose"].as<int>();
 
         std::string outname = uopt.opt["output"].as<string>();
-        std::string logname = outname + ".log.txt";
-        logfile.open(logname, ios::out | ios::binary);
-        if (logfile.fail())
-        {
-            throw std::runtime_error("Could not open logfile.");
-        }
-        GetSystemTime(&lt);
-        logfile << "main: Connecting to ultracomm. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
-        logfile.flush();
+//        std::string logname = outname + ".log.txt";
+//        logfile.open(logname, ios::out | ios::binary);
+//        if (logfile.fail())
+//        {
+//            throw std::runtime_error("Could not open logfile.");
+//        }
+//        GetSystemTime(&lt);
+//        logfile << "main: Connecting to ultracomm. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+//        logfile.flush();
 
         // Connect to Ultrasonix and set parameters.
-        Ultracomm uc = Ultracomm::Ultracomm(uopt, logfile);
-        GetSystemTime(&lt);
-        logfile << "main: Setting parameters. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
-        logfile.flush();
+//        Ultracomm uc = Ultracomm::Ultracomm(uopt, logfile);
+        Ultracomm uc = Ultracomm::Ultracomm(uopt);
+//        GetSystemTime(&lt);
+//        logfile << "main: Setting parameters. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+//        logfile.flush();
         uc.set_int_imaging_params(lazy_param_set);
         uc.check_int_imaging_params();
         uc.freeze(blocking);
@@ -81,9 +82,9 @@ int main(int argc, char* argv[])
             _getch();  // Wait for user input.
         }
         uc.disconnect();
-        GetSystemTime(&lt);
-        logfile << "main: disconnected from ultracomm. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
-        logfile.flush();
+//        GetSystemTime(&lt);
+//        logfile << "main: disconnected from ultracomm. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+//        logfile.flush();
         exit_status = EXIT_SUCCESS;
     }
     catch(const UltracommOptions::WantsToStop& e) {   // --help or --version
@@ -118,19 +119,44 @@ int main(int argc, char* argv[])
     }
     catch(const exception& e) {
         cerr << "Exception: " << e.what() << "\n";
-        logfile.flush();
+//        logfile.flush();
         exit_status = UNKNOWN_ERROR;
     }
     catch(...) {
         cerr << "Unhandled exception of unknown type!\n";
-        logfile.flush();
+//        logfile.flush();
         exit_status = UNKNOWN_ERROR;
     }
 
-    GetSystemTime(&lt);
-    logfile << "main: Exiting. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
-    logfile.flush();
+//    GetSystemTime(&lt);
+//    logfile << "main: Exiting. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+//    logfile.flush();
     return exit_status;
 }
 
+int exception_filter(unsigned int code, struct _EXCEPTION_POINTERS *ep) {
+    cerr << "In exception_filter().\n";
+    if (code == EXCEPTION_ACCESS_VIOLATION) {
+        cerr << "WARNING: Ignoring access violation.\n";
+        return EXCEPTION_EXECUTE_HANDLER;
+        cin.ignore();
+    }
+    else {
+        cerr << "WARNING: Unknown exception type.\n";
+        return EXCEPTION_CONTINUE_SEARCH;
+        cin.ignore();
+    }
+}
 
+int main(int argc, char* argv[])
+{
+    __try
+    {
+        int exit_status = mymain(argc, argv);
+        return exit_status;
+    }
+    __except(exception_filter(GetExceptionCode(), GetExceptionInformation()))
+    {
+        return -1;
+    }
+}

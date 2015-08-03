@@ -15,28 +15,38 @@ int callback_verbose = 0;
 ofstream datafile;
 int myframesize;
 ofstream indexfile;
-ofstream* logfile_p;
-SYSTEMTIME lt;
+//ofstream* logfile_p;
+//SYSTEMTIME lt;
 
 /*
     Construct Ultracomm object, connect to server,
     and set/check parameters.
 */
-Ultracomm::Ultracomm(const UltracommOptions& myuopt, ofstream& mylogfile)
+//Ultracomm::Ultracomm(const UltracommOptions& myuopt, ofstream& mylogfile)
+Ultracomm::Ultracomm(const UltracommOptions& myuopt)
     : uopt(myuopt),
       address(myuopt.opt["address"].as<string>()),
       acqmode(myuopt.opt["acqmode"].as<string>()),
       datatype(myuopt.opt["datatype"].as<int>()),
-      verbose(myuopt.opt["verbose"].as<int>()),
-      logfile(mylogfile)
+      verbose(myuopt.opt["verbose"].as<int>())
+//      logfile(mylogfile)
 {
-    logfile_p = &logfile;
-    connect();
-    callback_verbose = verbose;
+//    logfile_p = &logfile;
+    ult = new ulterius;
     if (verbose) {
-        cerr << "Setting data to acquire to datatype " << datatype << ".\n";
+        cerr << "Attempting to connect to Ultrasonix.\n";
     }
-//    ult.setDataToAcquire(datatype);
+    connect();
+    if (! ult->isConnected())
+    {
+        Sleep(200);
+        throw ConnectionError();
+    }
+    callback_verbose = verbose;
+//    if (verbose) {
+//        cerr << "Setting data to acquire to datatype " << datatype << ".\n";
+//    }
+//    ult->setDataToAcquire(datatype);
 //    set_int_imaging_params();
 //    check_int_imaging_params();
     const int compstat = uopt.opt["compression_status"].as<int>();
@@ -44,15 +54,15 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt, ofstream& mylogfile)
         cerr << "Setting compression status to " << compstat << ".\n";
     }
 
-    if (! ult.setCompressionStatus(compstat)) {
+    if (! ult->setCompressionStatus(compstat)) {
         cerr << "Failed to set compression status to " << compstat << ".\n";
         throw ParameterMismatchError();
     }
-    if (! ult.getDataDescriptor((uData)datatype, desc))
+    if (! ult->getDataDescriptor((uData)datatype, desc))
     {
         throw DataDescriptorError();
     }
-    if (! ult.isDataAvailable((uData)datatype))
+    if (! ult->isDataAvailable((uData)datatype))
     {
         throw DataError();
     }
@@ -82,7 +92,7 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt, ofstream& mylogfile)
         //    throw OutputError();
         //}
         if (acqmode == "continuous") {
-            //ult.setCallback(frame_callback);
+            //ult->setCallback(frame_callback);
             write_header(desc, 0);
         }
     }
@@ -93,12 +103,12 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt, ofstream& mylogfile)
 */
 Ultracomm::~Ultracomm()
 {
-    GetSystemTime(&lt);
-    logfile << "uc: In destructor. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
-    logfile.flush();
-    GetSystemTime(&lt);
-    logfile << "uc: Flushing log at end of destructor. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
-    logfile.flush();
+//    GetSystemTime(&lt);
+//    logfile << "uc: In destructor. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
+//    logfile.flush();
+//    GetSystemTime(&lt);
+//    logfile << "uc: Flushing log at end of destructor. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
+//    logfile.flush();
 }
 
 /*
@@ -109,25 +119,25 @@ void Ultracomm::connect()
     if (verbose) {
         cerr << "Connecting to ultrasonix at address " << address << ".\n";
     }
-    ult.setMessaging(false);
-    logfile << "Connecting to ultrasonix at address " << address << ".\n";
-    logfile.flush();
-    if (!ult.connect(address.c_str()))
+    ult->setMessaging(false);
+//    logfile << "Connecting to ultrasonix at address " << address << ".\n";
+//    logfile.flush();
+    if (!ult->connect(address.c_str()))
     {
         throw ConnectionError();
     }
-    logfile << "Connected to ultrasonix.\n";
-    logfile.flush();
+//    logfile << "Connected to ultrasonix.\n";
+//    logfile.flush();
     // Stop streaming, if necessary.
-    //if (ult.getStreamStatus()) {
-    //    ult.stopStream();
+    //if (ult->getStreamStatus()) {
+    //    ult->stopStream();
     //}
 /*
-    int imgmode = ult.getActiveImagingMode();
+    int imgmode = ult->getActiveImagingMode();
     cout << "Imaging mode is " << imgmode << ".\n";
-    bool im = ult.getInjectMode();
+    bool im = ult->getInjectMode();
     cout << "Inject mode is " << im << ".\n";
-    bool ss = ult.getStreamStatus();
+    bool ss = ult->getStreamStatus();
     cout << "Stream status is " << ss << ".\n";
 */
 /*
@@ -178,14 +188,14 @@ void Ultracomm::disconnect()
             printf("No frames acquired.\n");
         }
     }
-    if (ult.isConnected())
+    if (ult->isConnected())
     {
         //mylog << "Disconnecting from ultrasonix.\n";
         //mylog.flush();
         if (verbose) {
             cerr << "Disconnecting from Ultrasonix.\n";
         }
-        ult.disconnect();
+        ult->disconnect();
         //mylog << "Disconnected from ultrasonix.\n";
         //mylog.flush();
     }
@@ -197,6 +207,8 @@ void Ultracomm::disconnect()
             cerr << "Already disconnected from Ultrasonix.\n";
         }
     }
+    delete ult;
+    //ult->~ulterius();
 }
 
 /*
@@ -206,14 +218,16 @@ void Ultracomm::set_data_to_acquire(const bool block)
 {
     //mylog << "Setting data to acquire.\n";
     //mylog.flush();
-    ult.setDataToAcquire(datatype);
+    ult->setDataToAcquire(datatype);
     if (block)
     {
-        while (ult.getDataToAcquire() != datatype)
+        while (ult->getDataToAcquire() != datatype)
         {
-            //if (verbose) {
+            ult->setDataToAcquire(datatype);
+            if (verbose) {
                 cerr << "Waiting for confirmation that data acquisition has been set.\n";
-           // }
+                cerr << "Acquisition datatype is currently " << ult->getDataToAcquire() << ".\n";
+            }
         }
     }
 }
@@ -225,10 +239,10 @@ void Ultracomm::unset_data_to_acquire(const bool block)
 {
     //mylog << "Unsetting data to acquire.\n";
     //mylog.flush();
-    ult.setDataToAcquire(0);
+    ult->setDataToAcquire(0);
     if (block)
     {
-        while (ult.getDataToAcquire() != 0)
+        while (ult->getDataToAcquire() != 0)
         {
             if (verbose) {
                 cerr << "Waiting for confirmation that data acquisition has been unset.\n";
@@ -242,31 +256,31 @@ void Ultracomm::unset_data_to_acquire(const bool block)
 */
 void Ultracomm::freeze(const bool block)
 {
-    GetSystemTime(&lt);
-    logfile << "uc: Freezing. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
-    logfile.flush();
+//    GetSystemTime(&lt);
+//    logfile << "uc: Freezing. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
+//    logfile.flush();
     if (acqmode == "continuous") {
-        ult.setCallback(frame_callback_noop);
-        GetSystemTime(&lt);
-        logfile << "uc: Setting callback to no-op. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
-        logfile.flush();
+        ult->setCallback(frame_callback_noop);
+//        GetSystemTime(&lt);
+//        logfile << "uc: Setting callback to no-op. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
+//        logfile.flush();
     }
     // 1 = FROZEN; 0 = IMAGING
-    if (ult.getFreezeState() != 1)
+    if (ult->getFreezeState() != 1)
     {
-        GetSystemTime(&lt);
-        logfile << "uc: Freezing ultrasonix. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
-        logfile.flush();
+//        GetSystemTime(&lt);
+//        logfile << "uc: Freezing ultrasonix. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
+//        logfile.flush();
         if (verbose) {
             cerr << "Freezing Ultrasonix.\n";
         }
-        ult.toggleFreeze();
+        ult->toggleFreeze();
     }
     else
     {
-        GetSystemTime(&lt);
-        logfile << "uc: Ultrasonix already frozen. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
-        logfile.flush();
+//        GetSystemTime(&lt);
+//        logfile << "uc: Ultrasonix already frozen. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
+//        logfile.flush();
         if (verbose) {
             cerr << "Ultrasonix already frozen.\n";
         }
@@ -275,11 +289,11 @@ void Ultracomm::freeze(const bool block)
     // TODO: this would be safer with a timeout.
     if (block)
     {
-        while (ult.getFreezeState() != 1)
+        while (ult->getFreezeState() != 1)
         {
-            GetSystemTime(&lt);
-            logfile << "uc: Waiting for confirmation that ultrasonix has frozen. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
-            logfile.flush();
+//            GetSystemTime(&lt);
+//            logfile << "uc: Waiting for confirmation that ultrasonix has frozen. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
+//            logfile.flush();
 //            if (verbose) {
                 cerr << "Waiting for confirmation that Ultrasonix has frozen.\n";
 //                cout << "cout: Waiting for confirmation that Ultrasonix has frozen.\n";
@@ -316,31 +330,31 @@ void Ultracomm::freeze(const bool block)
 */
 void Ultracomm::unfreeze(const bool block)
 {
-    GetSystemTime(&lt);
-    logfile << "uc: Unfreezing. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
-    logfile.flush();
+//    GetSystemTime(&lt);
+//    logfile << "uc: Unfreezing. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
+//    logfile.flush();
     if (acqmode == "continuous") {
-        ult.setCallback(frame_callback);
-        GetSystemTime(&lt);
-        logfile << "uc: Setting callback to save data. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
-        logfile.flush();
+        ult->setCallback(frame_callback);
+//        GetSystemTime(&lt);
+//        logfile << "uc: Setting callback to save data. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
+//        logfile.flush();
     }
     // 1 = FROZEN; 0 = IMAGING
-    if (ult.getFreezeState() != 0)
+    if (ult->getFreezeState() != 0)
     {
-        GetSystemTime(&lt);
-        logfile << "uc: Unfreezing ultrasonix. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
-        logfile.flush();
+//        GetSystemTime(&lt);
+//        logfile << "uc: Unfreezing ultrasonix. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
+//        logfile.flush();
         if (verbose) {
             cerr << "Unfreezing Ultrasonix.\n";
         }
-        ult.toggleFreeze();
+        ult->toggleFreeze();
     }
     else
     {
-        GetSystemTime(&lt);
-        logfile << "uc: Ultrasonix already imaging. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
-        logfile.flush();
+//        GetSystemTime(&lt);
+//        logfile << "uc: Ultrasonix already imaging. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
+//        logfile.flush();
         if (verbose) {
             cerr << "Ultrasonix already imaging.\n";
         }
@@ -349,11 +363,11 @@ void Ultracomm::unfreeze(const bool block)
     // TODO: this would be safer with a timeout.
     if (block)
     {
-        while (ult.getFreezeState() != 0)
+        while (ult->getFreezeState() != 0)
         {
-            GetSystemTime(&lt);
-            logfile << "uc: Waiting for confirmation that Ultrasonix is imaging. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
-            logfile.flush();
+//            GetSystemTime(&lt);
+//            logfile << "uc: Waiting for confirmation that Ultrasonix is imaging. Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
+//            logfile.flush();
 //            if (verbose) {
                 cerr << "Waiting for confirmation that Ultrasonix is imaging.\n";
 //                cout << "cout: Waiting for confirmation that Ultrasonix is imaging.\n";
@@ -372,12 +386,12 @@ void Ultracomm::dump_params()
     int val;
     uParam param;
     cout << "index\tparam.id\tvalue\tparam.name\tparam.source\tparam.type\n";
-    while (ult.getParam(i++, param))
+    while (ult->getParam(i++, param))
     {
         // TODO: Learn about different param types and how to get their values.
         // This probably doesn't work properly for non-integer param values.
         // Have not been able to get getParamValue() to return false either.
-        if (ult.getParamValue(param.id, val))
+        if (ult->getParamValue(param.id, val))
         {
             cout << i << "\t" << param.id << "\t" << val << "\t" << param.name << "\t" << param.source << "\t" << param.type << "\t" << param.unit << "\n";
         }
@@ -418,12 +432,12 @@ void Ultracomm::set_int_imaging_params(const bool lazy)
         if (params.count(optname)) {
             int val, got;
             val = params[optname].as<int>();
-            ult.getParamValue(ultname.c_str(), got);
+            ult->getParamValue(ultname.c_str(), got);
             if (!lazy || got != val) {
                 if (verbose) {
                     cerr << "Setting '" << ultname << "' to value " << val << ".\n";
                 }
-                ult.setParamValue(ultname.c_str(), val);
+                ult->setParamValue(ultname.c_str(), val);
             }
             else {
                 if (verbose) {
@@ -453,7 +467,7 @@ void Ultracomm::check_int_imaging_params()
         if (params.count(optname)) {
             int expected, got;
             expected = params[optname].as<int>();
-            ult.getParamValue(ultname.c_str(), got);
+            ult->getParamValue(ultname.c_str(), got);
             if (verbose) {
                 cerr << "Got value of '" << ultname << "'. Expected " << expected << " and got " << got << ".\n";
             }
@@ -472,20 +486,20 @@ void Ultracomm::save_data()
 {
     //mylog << "Saving data.\n";
     //mylog.flush();
-    int num_frames = ult.getCineDataCount((uData)datatype);
+    int num_frames = ult->getCineDataCount((uData)datatype);
     write_header(desc, num_frames);
 
     // TODO: figure out why buffer and sz makes program crash
     //const int sz = 2 * 1024 * 1024;
     //char buffer[BUFFERSIZE];  // TODO: determine appropriate sizes on the fly
-//    int num_frames = ult.getCineDataCount((uData)datatype);
+//    int num_frames = ult->getCineDataCount((uData)datatype);
 
     for (int idx = 0; idx < num_frames; idx++)
     {
         if (verbose) {
             cerr << "Getting cine data for frame " << idx << ".\n";
         }
-        ult.getCineData((uData)datatype, idx, false, (char**)&gBuffer, BUFFERSIZE);
+        ult->getCineData((uData)datatype, idx, false, (char**)&gBuffer, BUFFERSIZE);
         datafile.write(gBuffer, framesize);
         if (verbose) {
             cerr << "Wrote cine data for frame " << idx << ".\n";
@@ -538,7 +552,7 @@ void Ultracomm::write_header(const uDataDesc& desc, const int& num_frames)
     };
     for (int i = 0; i < sizeof(queries) / sizeof(queries[0]); ++i) {
         int val;
-        ult.getParamValue(queries[i].c_str(), val);
+        ult->getParamValue(queries[i].c_str(), val);
         datafile.write(reinterpret_cast<const char *>(&(__int32)val), isize);
     }
     // FIXME: Figure out how to determine the value of the 'extra' field.
@@ -606,9 +620,9 @@ bool Ultracomm::frame_callback(void* data, int type, int sz, bool cine, int frmn
         cerr <<  lastFrame + frame_incr << " (frmnum: " << frmnum << ")\n";
     }
 
-    GetSystemTime(&lt);
-    *logfile_p << "callback: lastFrame + frame_incr = " << lastFrame + frame_incr << " (frmnum: " << frmnum << "). Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ". ";
-    logfile_p->flush();
+//    GetSystemTime(&lt);
+//    *logfile_p << "callback: lastFrame + frame_incr = " << lastFrame + frame_incr << " (frmnum: " << frmnum << "). Localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ". ";
+//    logfile_p->flush();
 
     // make sure we dont do an operation that takes longer than the acquisition frame rate
     //memcpy(gBuffer, data, sz);
@@ -616,9 +630,9 @@ bool Ultracomm::frame_callback(void* data, int type, int sz, bool cine, int frmn
     indexfile.write(frmint.c_str(), frmint.size());
     datafile.write((const char*)data, sz);
 
-    GetSystemTime(&lt);
-    *logfile_p << "Exiting: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
-    logfile_p->flush();
+//    GetSystemTime(&lt);
+//    *logfile_p << "Exiting: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+//    logfile_p->flush();
     return true;
 }
 
@@ -673,9 +687,9 @@ bool Ultracomm::frame_callback_ignore_data(void* data, int type, int sz, bool ci
         cerr <<  "Ignoring " << lastFrame + frame_incr << " (frmnum: " << frmnum << ")\n";
     }
 
-    GetSystemTime(&lt);
-    *logfile_p << "callback_ignore_data: lastFrame + frame_incr = " << lastFrame + frame_incr << " (frmnum: " << frmnum << "). Exiting at localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
-    logfile_p->flush();
+//    GetSystemTime(&lt);
+//    *logfile_p << "callback_ignore_data: lastFrame + frame_incr = " << lastFrame + frame_incr << " (frmnum: " << frmnum << "). Exiting at localtime: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << ".\n";
+//    logfile_p->flush();
 
     return true;
 }
