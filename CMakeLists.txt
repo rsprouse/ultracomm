@@ -32,7 +32,7 @@ SET(Boost_LIBRARYDIR "C:/local/boost_1_55_0/lib32-msvc-10.0")
 
 # ultracomm version number (only ultracomm developers should change this).
 SET(Ultracomm_VERSION_MAJOR "0")
-SET(Ultracomm_VERSION_MINOR "1")
+SET(Ultracomm_VERSION_MINOR "2")
 SET(Ultracomm_VERSION_PATCH "0")
 
 #### End of variables to be changed. ####
