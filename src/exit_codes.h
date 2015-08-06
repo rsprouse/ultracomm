@@ -12,8 +12,14 @@
 // Program requested a feature that has not been implemented.
 #define UNIMPLEMENTED_FEATURE_ERROR 3
 
+// Runtime error. Probably issue with logfile.
+#define RUNTIME_ERROR 100
+
 // Could not connect to the Ultrasonix server.
-#define CONNECTION_ERROR 100
+#define CONNECTION_ERROR 101
+
+// Error in setting Ultrasonix imaging parameters.
+#define PARAMETER_MISMATCH_ERROR 102
 
 // Unknown.
 #define UNKNOWN_ERROR 255
