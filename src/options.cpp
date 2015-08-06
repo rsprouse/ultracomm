@@ -4,8 +4,12 @@
   Command line and options file option handling for ultracomm.
 */
 
-UltracommOptions::UltracommOptions(const int& argc, char* argv[])
+UltracommOptions::UltracommOptions()
     : int_imaging_params("Ultracomm integer parameters")
+{
+}
+
+void UltracommOptions::loadargs(const int& argc, char* argv[])
 {
     //string appName = boost::filesystem::basename(argv[0]);
 
@@ -37,7 +41,7 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
 
     // Options allowed in options file or on command line.
 /*
-    NOTE: this one is now in the initialization list
+    NOTE: this one is now in the initialization list of the constructor.
     po::options_description int_imaging_params("Ultracomm integer imaging parameters");
 */
     int_imaging_params.add_options()
