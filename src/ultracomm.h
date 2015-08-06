@@ -10,7 +10,6 @@ using namespace std;
 
 class Ultracomm
 {
-    ulterius* ult;                  // interface to Ultrasonix dll
     const UltracommOptions& uopt;  // program options
     const string address;          // IP address of Ultrasonix machine
     const string acqmode;          // acquisition mode ("continuous"|"buffered")
@@ -18,9 +17,10 @@ class Ultracomm
     uDataDesc desc;                // data descriptor
     int framesize;           // size of frame image
     const int verbose;             // verbosity
-//    ofstream& logfile;              // log file
+    ofstream& logfile;              // log file
 
 public:
+    ulterius* ult;                  // interface to Ultrasonix dll
     struct ConnectionError : public exception
     {
       const char * what () const throw ()
@@ -58,9 +58,10 @@ public:
     };
 
 
-    //Ultracomm(const UltracommOptions& myuopt, ofstream& mylogfile);
-    Ultracomm(const UltracommOptions& myuopt);
+    Ultracomm(const UltracommOptions& myuopt, ofstream& mylogfile);
+    //Ultracomm(const UltracommOptions& myuopt);
     ~Ultracomm();
+//    void initialize();
     void connect();
     void disconnect();
     void set_data_to_acquire(const bool block);
