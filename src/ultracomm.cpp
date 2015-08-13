@@ -43,19 +43,16 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt, ofstream& mylogfile)
     if (! uopt.opt.count("freeze-only"))
     {
         std::string outname = myuopt.opt["output"].as<string>();
-        datafile.open(outname, ios::out | ios::binary);
+        datafile.open(outname, ios::out | ios::binary | ios::unitbuf);
         if (datafile.fail())
         {
             throw OutputError();
         }
         std::string outindexname = outname + ".idx.txt";
-        indexfile.open(outindexname, ios::out | ios::binary);
+        indexfile.open(outindexname, ios::out | ios::binary | ios::unitbuf);
         if (indexfile.fail())
         {
             throw OutputError();
-        }
-        if (acqmode == "continuous") {
-            write_header(desc, 0);
         }
     }
 }
@@ -88,14 +85,6 @@ void Ultracomm::initialize()
     if (! ult->setCompressionStatus(compstat)) {
         cerr << "Failed to set compression status to " << compstat << ".\n";
         throw ParameterMismatchError();
-    }
-    if (! ult->getDataDescriptor((uData)datatype, desc))
-    {
-        throw DataDescriptorError();
-    }
-    if (! ult->isDataAvailable((uData)datatype))
-    {
-        throw DataError();
     }
 }
 */
@@ -131,6 +120,21 @@ void Ultracomm::connect()
     }
     logfile << "Connected to ultrasonix.\n";
     logfile.flush();
+    if (! ult->getDataDescriptor((uData)datatype, desc))
+    {
+        throw DataDescriptorError();
+    }
+    if (! ult->isDataAvailable((uData)datatype))
+    {
+        throw DataError();
+    }
+    if (acqmode == "continuous") {
+        write_header(desc, 0);
+        ult->setCallback(frame_callback);
+        GetSystemTime(&mylt);
+        logfile << "uc: Setting callback to save data in connect(). Localtime: " << mylt.wHour << ":" << mylt.wMinute << ":" << mylt.wSecond << "." << mylt.wMilliseconds << ".\n";
+        logfile.flush();
+    }
     // Stop streaming, if necessary.
     //if (ult->getStreamStatus()) {
     //    ult->stopStream();
@@ -187,10 +191,15 @@ void Ultracomm::disconnect()
         if (framesReceived > 0 )
         {
             printf("Acquired %d of %d frames (%0.4f percent).\n", framesReceived, expected, pct);
+            logfile << "Acquired " << framesReceived << " of " << expected << " frames (" << pct << " percent).\n";
+            logfile.flush();
         }
         else
         {
-            printf("No frames acquired.\n");
+            cerr << "No frames acquired.\n";
+            logfile << "No frames acquired. Throwing exception.\n";
+            logfile.flush();
+            throw NoFramesError();
         }
     }
     if (ult->isConnected())
@@ -262,15 +271,6 @@ void Ultracomm::unset_data_to_acquire(const bool block)
 */
 void Ultracomm::freeze(const bool block)
 {
-    GetSystemTime(&mylt);
-    logfile << "uc: Freezing. Localtime: " << mylt.wHour << ":" << mylt.wMinute << ":" << mylt.wSecond << "." << mylt.wMilliseconds << ".\n";
-    logfile.flush();
-    if (acqmode == "continuous") {
-        ult->setCallback(frame_callback_noop);
-        GetSystemTime(&mylt);
-        logfile << "uc: Setting callback to no-op. Localtime: " << mylt.wHour << ":" << mylt.wMinute << ":" << mylt.wSecond << "." << mylt.wMilliseconds << ".\n";
-        logfile.flush();
-    }
     // 1 = FROZEN; 0 = IMAGING
     if (ult->getFreezeState() != 1)
     {
@@ -305,6 +305,9 @@ void Ultracomm::freeze(const bool block)
             }
             Sleep(10);
         }
+        GetSystemTime(&mylt);
+        logfile << "uc: Received confirmation that ultrasonix has frozen. Localtime: " << mylt.wHour << ":" << mylt.wMinute << ":" << mylt.wSecond << "." << mylt.wMilliseconds << ".\n";
+        logfile.flush();
     }
     /*
        FIXME: Occasionally we get the message
@@ -331,19 +334,34 @@ void Ultracomm::freeze(const bool block)
 }
 
 /*
+  Select the callback function to handle data.
+
+  handler = data|no-op
+*/
+void Ultracomm::set_callback(const std::string handler)
+{
+    if (handler == "data")
+    {
+        GetSystemTime(&mylt);
+        logfile << "uc: Setting callback to save data. Localtime: " << mylt.wHour << ":" << mylt.wMinute << ":" << mylt.wSecond << "." << mylt.wMilliseconds << ".\n";
+        logfile.flush();
+        ult->setCallback(frame_callback);
+    }
+    else if (handler == "no-op")
+    {
+        GetSystemTime(&mylt);
+        logfile << "uc: Setting callback to save data. Localtime: " << mylt.wHour << ":" << mylt.wMinute << ":" << mylt.wSecond << "." << mylt.wMilliseconds << ".\n";
+        logfile.flush();
+        ult->setCallback(frame_callback_noop);
+    }
+
+}
+
+/*
   Put ultrasonix into imaging state.
 */
 void Ultracomm::unfreeze(const bool block)
 {
-    GetSystemTime(&mylt);
-    logfile << "uc: Unfreezing. Localtime: " << mylt.wHour << ":" << mylt.wMinute << ":" << mylt.wSecond << "." << mylt.wMilliseconds << ".\n";
-    logfile.flush();
-    if (acqmode == "continuous") {
-        ult->setCallback(frame_callback);
-        GetSystemTime(&mylt);
-        logfile << "uc: Setting callback to save data. Localtime: " << mylt.wHour << ":" << mylt.wMinute << ":" << mylt.wSecond << "." << mylt.wMilliseconds << ".\n";
-        logfile.flush();
-    }
     // 1 = FROZEN; 0 = IMAGING
     if (ult->getFreezeState() != 0)
     {
@@ -368,16 +386,40 @@ void Ultracomm::unfreeze(const bool block)
     // TODO: this would be safer with a timeout.
     if (block)
     {
-        while (ult->getFreezeState() != 0)
+        GetSystemTime(&mylt);
+        logfile << "uc: Blocking until confirmed that Ultrasonix is imaging. Localtime: " << mylt.wHour << ":" << mylt.wMinute << ":" << mylt.wSecond << "." << mylt.wMilliseconds << ".\n";
+        logfile.flush();
+        cerr << "Blocking until confirmed that Ultrasonix is imaging.\n";
+        if (ult->getFreezeState() == 0)
         {
-            if (verbose) {
-                GetSystemTime(&mylt);
-                logfile << "uc: Waiting for confirmation that Ultrasonix is imaging. Localtime: " << mylt.wHour << ":" << mylt.wMinute << ":" << mylt.wSecond << "." << mylt.wMilliseconds << ".\n";
-                logfile.flush();
-                cerr << "Waiting for confirmation that Ultrasonix is imaging.\n";
-            }
-            Sleep(10);
+            GetSystemTime(&mylt);
+            logfile << "uc: Confirmed that Ultrasonix is imaging. Localtime: " << mylt.wHour << ":" << mylt.wMinute << ":" << mylt.wSecond << "." << mylt.wMilliseconds << ".\n";
+            logfile.flush();
+            cerr << "Confirmed that Ultrasonix is imaging.\n";
         }
+        else
+        {
+            while (ult->getFreezeState() != 0)
+            {
+                if (verbose) {
+                    GetSystemTime(&mylt);
+                    logfile << "uc: Waiting for confirmation that Ultrasonix is imaging. Localtime: " << mylt.wHour << ":" << mylt.wMinute << ":" << mylt.wSecond << "." << mylt.wMilliseconds << ".\n";
+                    logfile.flush();
+                    cerr << "Waiting for confirmation that Ultrasonix is imaging.\n";
+                }
+                Sleep(10);
+            }
+            GetSystemTime(&mylt);
+            logfile << "uc: Received confirmation that ultrasonix is imaging. Localtime: " << mylt.wHour << ":" << mylt.wMinute << ":" << mylt.wSecond << "." << mylt.wMilliseconds << ".\n";
+            logfile.flush();
+            cerr << "Received confirmation that Ultrasonix is imaging.\n";
+        }
+    } else
+    {
+        GetSystemTime(&mylt);
+        logfile << "uc: Not blocking until confirmed that Ultrasonix is imaging. Localtime: " << mylt.wHour << ":" << mylt.wMinute << ":" << mylt.wSecond << "." << mylt.wMilliseconds << ".\n";
+        logfile.flush();
+        cerr << "Not blocking until confirmed that Ultrasonix is imaging.\n";
     }
 }
 
@@ -625,12 +667,12 @@ bool Ultracomm::frame_callback(void* data, int type, int sz, bool cine, int frmn
     }
 
     GetSystemTime(&mylt);
-    *logfile_p << "callback: lastFrame + frame_incr = " << lastFrame + frame_incr << " (frmnum: " << frmnum << "). Localtime: " << mylt.wHour << ":" << mylt.wMinute << ":" << mylt.wSecond << "." << mylt.wMilliseconds << ". ";
+    *logfile_p << "frame_callback: lastFrame + frame_incr = " << lastFrame + frame_incr << " (frmnum: " << frmnum << "). Localtime: " << mylt.wHour << ":" << mylt.wMinute << ":" << mylt.wSecond << "." << mylt.wMilliseconds << ". ";
     logfile_p->flush();
 
     // make sure we dont do an operation that takes longer than the acquisition frame rate
     //memcpy(gBuffer, data, sz);
-    std::string frmint = std::to_string(long double(frmnum+frame_incr)) + "\n";
+    std::string frmint = std::to_string(long(frmnum+frame_incr)) + "\n";
     indexfile.write(frmint.c_str(), frmint.size());
     datafile.write((const char*)data, sz);
 
@@ -646,7 +688,7 @@ bool Ultracomm::frame_callback(void* data, int type, int sz, bool cine, int frmn
 bool Ultracomm::frame_callback_noop(void* data, int type, int sz, bool cine, int frmnum)
 {
     GetSystemTime(&mylt);
-    *logfile_p << "callback_noop: no-op callback called with frmnum = " << frmnum << ". Localtime: " << mylt.wHour << ":" << mylt.wMinute << ":" << mylt.wSecond << "." << mylt.wMilliseconds << ".\n";
+    *logfile_p << "frame_callback_noop: no-op callback called with frmnum = " << frmnum << ". Localtime: " << mylt.wHour << ":" << mylt.wMinute << ":" << mylt.wSecond << "." << mylt.wMilliseconds << ".\n";
     logfile_p->flush();
     return true;
 }
@@ -706,7 +748,7 @@ bool Ultracomm::param_callback_noop(void* paramID, int ptX, int ptY)
     GetSystemTime(&mylt);
     char* id = (char*)paramID;
     std::string text(id);
-    *logfile_p << "param_callback_noop: no-op param callback called for param id '" << text << "'. Localtime: " << mylt.wHour << ":" << mylt.wMinute << ":" << mylt.wSecond << "." << mylt.wMilliseconds << ".\n";
+    *logfile_p << "param_callback_noop: no-op param callback called for param id '" << text << "' with values ptX (" << ptX << ") and ptY (" << ptY << "). Localtime: " << mylt.wHour << ":" << mylt.wMinute << ":" << mylt.wSecond << "." << mylt.wMilliseconds << ".\n";
     logfile_p->flush();
     return true;
 }
