@@ -27,7 +27,10 @@ SET(ULTERIUS_LIB_NAME "ulterius_old.lib")
 SET(Boost_INCLUDE_DIR "C:/local/boost_1_55_0")
 
 # Add the location of the boost libaries.
-SET(Boost_LIBRARYDIR "C:/local/boost_1_55_0/lib32-msvc-10.0")
+# Visual Studio 2010
+#SET(Boost_LIBRARYDIR "C:/local/boost_1_55_0/lib32-msvc-10.0")
+# Visual Studio 12 2013
+SET(Boost_LIBRARYDIR "C:/local/boost_1_55_0/lib32-msvc-12.0")
 # end Boost configuration ##
 
 # ultracomm version number (only ultracomm developers should change this).
