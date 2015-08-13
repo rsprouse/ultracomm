@@ -12,6 +12,9 @@
 // Program requested a feature that has not been implemented.
 #define UNIMPLEMENTED_FEATURE_ERROR 3
 
+// Other problem with program options.
+#define BAD_OPTION_ERROR 4
+
 // Runtime error. Probably issue with logfile.
 #define RUNTIME_ERROR 100
 
@@ -20,6 +23,12 @@
 
 // Error in setting Ultrasonix imaging parameters.
 #define PARAMETER_MISMATCH_ERROR 102
+
+// Error in logfile creation.
+#define CREATE_LOGFILE_ERROR 103
+
+// No frames of ultrasound data were acquired.
+#define NO_FRAMES_ERROR 104
 
 // Unknown.
 #define UNKNOWN_ERROR 255
