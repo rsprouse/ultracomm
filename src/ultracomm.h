@@ -73,6 +73,7 @@ public:
     void set_data_to_acquire(const bool block);
     void unset_data_to_acquire(const bool block);
     void freeze(const bool block);
+    void set_callback(const std::string handler);
     void unfreeze(const bool block);
     void dump_params();
     void set_int_imaging_params(const bool lazy);
