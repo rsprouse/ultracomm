@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
         }
 
         /* Temporary hack to swallow access violation errors at program end. */
-        if (uopt.opt.count("error-hack"))
+        if (uopt.opt.count("av-hack"))
         {
             SetErrorMode(SetErrorMode(0) | SEM_NOGPFAULTERRORBOX | SEM_FAILCRITICALERRORS);
             GetSystemTime(&lt);
