@@ -56,6 +56,13 @@ public:
           return "Failed to open output file.";
         }
     };
+    struct NoFramesError : public exception
+    {
+      const char * what () const throw ()
+        {
+          return "No frames were acquired.";
+        }
+    };
 
 
     Ultracomm(const UltracommOptions& myuopt, ofstream& mylogfile);
