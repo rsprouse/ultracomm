@@ -66,7 +66,6 @@ public:
 
 
     Ultracomm(const UltracommOptions& myuopt, ofstream& mylogfile);
-    //Ultracomm(const UltracommOptions& myuopt);
     ~Ultracomm();
     void connect();
     void disconnect();
