@@ -54,6 +54,5 @@ public:
         }
     };
 
-    UltracommOptions();
-    void loadargs(const int& argc, char* argv[]);
+    UltracommOptions(const int& argc, char* argv[]);
 };

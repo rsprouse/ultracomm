@@ -4,12 +4,8 @@
   Command line and options file option handling for ultracomm.
 */
 
-UltracommOptions::UltracommOptions()
+UltracommOptions::UltracommOptions(const int& argc, char* argv[])
     : int_imaging_params("Ultracomm integer parameters")
-{
-}
-
-void UltracommOptions::loadargs(const int& argc, char* argv[])
 {
     //string appName = boost::filesystem::basename(argv[0]);
 
@@ -20,8 +16,9 @@ void UltracommOptions::loadargs(const int& argc, char* argv[])
         ("version", "print ultracomm version and stop")
         ("freeze-only", "send freeze command to ultrasonix and stop")
         ("dump-params", "print current ultrasonix parameter values and stop")
-        ("sdkversion", "print Ultrasonix SDK version used to compile ultracomm and stop")
+        ("sdk-version", "print Ultrasonix SDK version used to compile ultracomm and stop")
         ("params,p", po::value<string>(), "parameter options file (see below)")
+        ("error-hack", "attempt to recover from access violation errors")
     ;
 
     // Options allowed in options file or on command line.
@@ -73,7 +70,7 @@ void UltracommOptions::loadargs(const int& argc, char* argv[])
     cmd_or_file.add(global_opts).add(int_imaging_params);
 
     // Read command line options into opt.
-    po::store(po::parse_command_line(argc, argv, cmdline_options), opt);
+    po::store(po::parse_command_line(argc, argv, cmdline_options), opt, true);
 
     // This precedes po::notify() in case of error in parameters.
     if (opt.count("help")) {
@@ -96,7 +93,7 @@ void UltracommOptions::loadargs(const int& argc, char* argv[])
             throw WantsToStop();
         }
     }
-    if (opt.count("sdkversion")) {
+    if (opt.count("sdk-version")) {
         cout << ULTERIUS_SDK_VERSION;
         if (opt.count("delay-exit")) {
             throw WantsToStopWithDelay();
@@ -133,12 +130,12 @@ void UltracommOptions::loadargs(const int& argc, char* argv[])
     if (! (opt.count("freeze-only") || opt.count("dump-params"))) {
         if (opt["output"].as<string>() == "") {
             cerr << "No output file specified. Quitting.\n";
-            throw MissingRequiredOptionError();
+            throw po::required_option("--output");
         }
         const string ext = ".bpr";
         if (! boost::algorithm::ends_with(opt["output"].as<string>(), ext))
         {
-            cerr << "Only .bpr output is supported.\n";
+            cerr << "Output file must end with '.bpr'. Only .bpr output is supported.\n";
             throw UnimplementedFeatureError();
         }
         if (opt["datatype"].as<int>() != 2)
