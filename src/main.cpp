@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
         verbose = uopt.opt["verbose"].as<int>();
         
 
-        if (uopt.opt.count("do-log") && !uopt.opt.count("freeze-only"))
+        if (uopt.opt.count("do-log") && !uopt.opt.count("init-only"))
         {
             std::string outname = uopt.opt["output"].as<string>();
             std::string logname = outname + ".log.txt";
@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
         if (uopt.opt.count("dump-params")) {
             uc.dump_params();
         }
-        else if (! uopt.opt.count("freeze-only")) {
+        else if (! uopt.opt.count("init-only")) {
             // Start acquisition, wait for user interaction, then stop.
 //            uc.unset_data_to_acquire(blocking);
             uc.set_data_to_acquire(blocking);

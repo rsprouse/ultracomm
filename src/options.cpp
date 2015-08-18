@@ -14,7 +14,7 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
     cmdlineonly.add_options()
         ("help,h", "print help message and stop")
         ("version", "print ultracomm version and stop")
-        ("freeze-only", "send freeze command to ultrasonix and stop")
+        ("init-only", "set parameters, send freeze command to ultrasonix, and stop")
         ("dump-params", "print current ultrasonix parameter values and stop")
         ("sdk-version", "print Ultrasonix SDK version used to compile ultracomm and stop")
         ("params,p", po::value<string>(), "parameter options file (see below)")
@@ -128,7 +128,7 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
 
     // Check that we are working within the limitations of the current 
     // program implementation.
-    if (! (opt.count("freeze-only") || opt.count("dump-params"))) {
+    if (! (opt.count("init-only") || opt.count("dump-params"))) {
         if (opt["output"].as<string>() == "") {
             cerr << "No output file specified. Quitting.\n";
             throw po::required_option("--output");
