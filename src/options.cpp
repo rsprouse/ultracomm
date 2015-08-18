@@ -18,6 +18,7 @@ UltracommOptions::UltracommOptions(const int& argc, char* argv[])
         ("dump-params", "print current ultrasonix parameter values and stop")
         ("sdk-version", "print Ultrasonix SDK version used to compile ultracomm and stop")
         ("params,p", po::value<string>(), "parameter options file (see below)")
+        ("do-log", "Create a .log.txt log file for the .bpr")
         ("av-hack", "attempt to recover from access violation errors")
     ;
 

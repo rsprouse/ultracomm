@@ -27,8 +27,9 @@ int main(int argc, char* argv[])
     try {
         UltracommOptions uopt = UltracommOptions::UltracommOptions(argc, argv);
         verbose = uopt.opt["verbose"].as<int>();
+        
 
-        if (! uopt.opt.count("freeze-only"))
+        if (uopt.opt.count("do-log") && !uopt.opt.count("freeze-only"))
         {
             std::string outname = uopt.opt["output"].as<string>();
             std::string logname = outname + ".log.txt";
@@ -46,9 +47,12 @@ int main(int argc, char* argv[])
         if (uopt.opt.count("av-hack"))
         {
             SetErrorMode(SetErrorMode(0) | SEM_NOGPFAULTERRORBOX | SEM_FAILCRITICALERRORS);
-            GetSystemTime(&lt);
-            logfile << "main: Using SetErrorMode to capture access violations: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
-            logfile.flush();
+            if (logfile)
+            {
+                GetSystemTime(&lt);
+                logfile << "main: Using SetErrorMode to capture access violations: " << lt.wHour << ":" << lt.wMinute << ":" << lt.wSecond << "." << lt.wMilliseconds << "\n";
+                logfile.flush();
+            }
         }
 
         Ultracomm uc = Ultracomm::Ultracomm(uopt, logfile);
