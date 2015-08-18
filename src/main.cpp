@@ -27,7 +27,6 @@ int main(int argc, char* argv[])
     try {
         UltracommOptions uopt = UltracommOptions::UltracommOptions(argc, argv);
         verbose = uopt.opt["verbose"].as<int>();
-        
 
         if (uopt.opt.count("do-log") && !uopt.opt.count("init-only"))
         {

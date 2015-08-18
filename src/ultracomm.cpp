@@ -40,7 +40,7 @@ Ultracomm::Ultracomm(const UltracommOptions& myuopt, ofstream& mylogfile)
     framesize = (desc.ss / 8) * desc.w * desc.h;
     myframesize = framesize;
 
-    if (! uopt.opt.count("freeze-only"))
+    if (! uopt.opt.count("init-only"))
     {
         std::string outname = myuopt.opt["output"].as<string>();
         datafile.open(outname, ios::out | ios::binary | ios::unitbuf);
@@ -187,7 +187,7 @@ void Ultracomm::disconnect()
         logfile << "Disconnecting from ultrasonix.\n";
         logfile.flush();
     }
-    if (! uopt.opt.count("freeze-only"))
+    if (! uopt.opt.count("init-only"))
     {
         write_numframes_in_header(framesReceived);
         // TODO: this should be a little cleaner, i.e. depend on open status,
@@ -376,7 +376,7 @@ void Ultracomm::freeze(const bool block)
     */
     if (
            uopt.opt["ms_delay_after_freeze"].as<int>() > 0 &&
-           !uopt.opt.count("freeze-only")
+           !uopt.opt.count("init-only")
     )
     {
         Sleep(uopt.opt["ms_delay_after_freeze"].as<int>());
