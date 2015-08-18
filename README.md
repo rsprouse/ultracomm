@@ -10,7 +10,8 @@ Prerequisites:
 --------------
 
 
- - Visual Studio 2010 Express Edition from Microsoft, Service Pack 1 or greater.
+ - Visual Studio 12 2013. Should also compile with Visual Studio 2010 Express Edition from Microsoft,
+   Service Pack 1 or greater.
 
  - boost (boost.org) libraries, especially program options library.
 
@@ -36,14 +37,17 @@ Compiling
 1. Provide the absolute path to your build folder in the "Where to build the
    binaries:" box, e.g. `C:\build\ultracomm`.
 
-1. Press the Configure button. Select the "Visual Studio 10" as the
-   "generator for this project".
+1. Press the Configure button. Select the "Visual Studio 12 2013" as the
+   "generator for this project". Use the "Select default native compilers"
+   option.
 
 1. Press Generate. 
 
 1. Look for the file named `ultracomm.sln` in your build folder.
-   Open it with Visual Studio 2010. You will see the ultracomm project
+   Open it with Visual Studio 2013. You will see the ultracomm project
    in the Solution Explorer pane.
+
+1. (Optional) Change the active configuration to 'Release'.
 
 1. Right-click the ultracomm project and choose 'Build'. This will compile `ultracomm.exe`.
 
